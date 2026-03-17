@@ -1,0 +1,42 @@
+EXTERN(_default_abort);
+
+PROVIDE(abort = _default_abort);
+PROVIDE(ExceptionHandler = abort);
+PROVIDE(InterruptHandler = abort);
+
+PROVIDE(UnalignedSP = ExceptionHandler);
+PROVIDE(UnalignedPC = ExceptionHandler);
+PROVIDE(InvalidInst = ExceptionHandler);
+PROVIDE(DoubleFault = ExceptionHandler);
+
+SECTIONS
+{
+  .ivt 0x00 : {     /* Interrupt vector table */
+    __vector_table = .;
+    KEEP(*(.ivt.reset_vector));
+    __vector_table_ex = .;
+    KEEP(*(.ivt.exceptions));
+    __vector_table_int = .;
+    KEEP(*(.ivt.interrupts));
+    __vector_table_end = .;
+  }
+
+  .text : {
+    *(.text._start);/* Reset/startup code */
+    *(.text*);      /* Program code */
+    *(.rodata*);    /* Read-only data */
+  }
+
+  .data : {
+    *(.data*);      /* Initialized variables */
+  }
+
+  .bss : {
+    *(.bss*);       /* Uninitialized variables */
+    *(COMMON);
+  }
+}
+
+ASSERT(__vector_table_ex == __vector_table + 0x4, "BUG(cdm-rt): the reset vector is missing");
+ASSERT(__vector_table_int == __vector_table_ex + 0x10, "BUG(cdm-rt): the exception vectors are missing");
+ASSERT(__vector_table_end == __vector_table_int + 0xEC, "ERROR(cdm-rt): no interrupt vectors were provided; use interrupt_vectors![...]");

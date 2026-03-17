@@ -1,0 +1,18 @@
+[package]
+name = "cdm-rt"
+version = "0.1.0"
+edition = "2024"
+build = "build.rs"
+
+[profile.dev]
+opt-level = 2
+debug = false
+
+[profile.release]
+opt-level = 2
+debug = false
+
+[dependencies]
+
+[features]
+interrupts = []
