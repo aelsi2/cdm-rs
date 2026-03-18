@@ -8,11 +8,5 @@ build = "build.rs"
 opt-level = 2
 debug = false
 
-[profile.release]
-opt-level = 2
-debug = false
-
-[dependencies]
-
 [features]
 interrupts = []

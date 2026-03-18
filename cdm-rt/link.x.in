@@ -1,3 +1,7 @@
+OUTPUT_FORMAT("binary")
+
+INCLUDE memory.x;
+
 EXTERN(_DefaultHandler);
 
 PROVIDE(ExceptionHandler = _DefaultHandler);
@@ -8,9 +12,13 @@ PROVIDE(UnalignedPC = ExceptionHandler);
 PROVIDE(InvalidInst = ExceptionHandler);
 PROVIDE(DoubleFault = ExceptionHandler);
 
+MEMORY {
+    IVT : ORIGIN = 0x0, LENGTH = 0x100
+}
+
 SECTIONS
 {
-  .ivt 0x00 : {     /* Interrupt vector table */
+  .ivt 0x00 : {             /* Interrupt vector table */
     __vector_table = .;
     KEEP(*(.ivt.reset_vector));
     __vector_table_ex = .;
@@ -18,22 +26,22 @@ SECTIONS
     __vector_table_int = .;
     KEEP(*(.ivt.interrupts));
     __vector_table_end = .;
-  }
+  } > IVT
 
   .text : {
-    *(.text._start);/* Reset/startup code */
-    *(.text*);      /* Program code */
-    *(.rodata*);    /* Read-only data */
-  }
+    *(.text._start);        /* Reset/startup code */
+    *(.text*);              /* Program code */
+    *(.rodata*);            /* Read-only data */
+  } > RAM
 
   .data : {
-    *(.data*);      /* Initialized variables */
-  }
+    *(.data*);              /* Initialized variables */
+  } > RAM
 
   .bss : {
-    *(.bss*);       /* Uninitialized variables */
+    *(.bss*);               /* Uninitialized variables */
     *(COMMON);
-  }
+  } > RAM
 }
 
 ASSERT(__vector_table_ex == __vector_table + 0x4, "BUG(cdm-rt): the reset vector is missing");
