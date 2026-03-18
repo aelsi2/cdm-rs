@@ -1,29 +1,28 @@
-//! Functions for accessing processor registers
+//! Functions for accessing processor registers.
 
 pub mod psr {
-    //! Processor status register (PSR)
-    
+    //! Processor status register (PSR).
     use bitmask_enum::bitmask;
     use core::arch::asm;
 
-    /// Processor status register flags
+    /// Processor status register flags.
     #[bitmask(u16)]
     pub enum Psr {
-        /// No flags
+        /// No flags.
         None = 0x0,
-        /// Arithmetic negative flag
+        /// Arithmetic negative flag.
         ArithNegative = 0x1,
-        /// Arithmetic zero flag
+        /// Arithmetic zero flag.
         ArithZero = 0x2,
-        /// Arithmetic overflow flag
+        /// Arithmetic overflow flag.
         ArithOverflow = 0x4,
-        /// Arithmetic carry flag
+        /// Arithmetic carry flag.
         ArithCarry = 0x8,
-        /// Interrupt enable flag
+        /// Interrupt enable flag.
         Interrupt = 0x8000,
     }
 
-    /// Reads the register value
+    /// Reads the register value.
     #[inline]
     pub fn read() -> Psr {
         let value: u16;
@@ -33,7 +32,7 @@ pub mod psr {
         Psr::from(value)
     }
 
-    /// Writes `val` to the register
+    /// Writes `value` to the register.
     #[inline]
     pub unsafe fn write(value: Psr) {
         let val: u16 = value.into();
@@ -44,10 +43,10 @@ pub mod psr {
 }
 
 pub mod pc {
-    //! Program counter (PC)
+    //! Program counter (PC).
     use core::arch::asm;
 
-    /// Reads the register value
+    /// Reads the register value.
     #[inline]
     pub fn read() -> usize {
         let value: usize;
@@ -57,7 +56,7 @@ pub mod pc {
         value
     }
 
-    /// Writes `val` to the register
+    /// Writes `value` to the register.
     #[inline]
     pub unsafe fn write(value: usize) {
         unsafe {
@@ -67,10 +66,10 @@ pub mod pc {
 }
 
 pub mod sp {
-    //! Stack pointer (SP)
+    //! Stack pointer (SP).
     use core::arch::asm;
 
-    /// Reads the register value
+    /// Reads the register value.
     #[inline]
     pub fn read() -> usize {
         let value: usize;
@@ -80,7 +79,7 @@ pub mod sp {
         value
     }
 
-    /// Writes `val` to the register
+    /// Writes `value` to the register.
     #[inline]
     pub unsafe fn write(value: usize) {
         unsafe {
@@ -90,10 +89,10 @@ pub mod sp {
 }
 
 pub mod fp {
-    //! Frame pointer (FP)
+    //! Frame pointer (FP).
     use core::arch::asm;
 
-    /// Reads the register value
+    /// Reads the register value.
     #[inline]
     pub fn read() -> usize {
         let value: usize;
@@ -103,7 +102,7 @@ pub mod fp {
         value
     }
 
-    /// Writes `val` to the register
+    /// Writes `value` to the register.
     #[inline]
     pub unsafe fn write(value: usize) {
         unsafe {

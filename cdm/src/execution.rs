@@ -1,8 +1,8 @@
-//! Functions for controlling program execution
+//! Functions for controlling program execution.
 
 use core::arch::asm;
 
-/// Halts the processor
+/// Halts the processor.
 #[inline]
 pub fn halt() -> ! {
     unsafe {
@@ -10,7 +10,7 @@ pub fn halt() -> ! {
     }
 }
 
-/// Performs a soft reset
+/// Performs a soft reset.
 #[inline]
 pub unsafe fn reset() -> ! {
     unsafe {
