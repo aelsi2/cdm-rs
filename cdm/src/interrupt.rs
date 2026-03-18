@@ -20,11 +20,11 @@ pub fn wait() {
     unsafe { asm!("wait", options(nostack, nomem, preserves_flags)) };
 }
 
-/// Triggers a software interrupt with number `V`
+/// Triggers a software interrupt with the number `V`
 ///
 /// `V` must be in the range [0; 63]
 #[inline]
-pub fn trigger<const V: u8>() {
+pub unsafe fn trigger<const V: u8>() {
     const {
         assert!(V < 64, "Interrupt vector must be in the range [0; 63]");
     }

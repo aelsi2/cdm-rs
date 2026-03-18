@@ -12,7 +12,7 @@ pub fn halt() -> ! {
 
 /// Performs a soft reset
 #[inline]
-pub fn reset() -> ! {
+pub unsafe fn reset() -> ! {
     unsafe {
         asm!("reset", options(noreturn));
     }
