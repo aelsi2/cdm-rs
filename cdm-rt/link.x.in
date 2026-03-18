@@ -1,8 +1,7 @@
-EXTERN(_default_abort);
+EXTERN(_DefaultHandler);
 
-PROVIDE(abort = _default_abort);
-PROVIDE(ExceptionHandler = abort);
-PROVIDE(InterruptHandler = abort);
+PROVIDE(ExceptionHandler = _DefaultHandler);
+PROVIDE(InterruptHandler = _DefaultHandler);
 
 PROVIDE(UnalignedSP = ExceptionHandler);
 PROVIDE(UnalignedPC = ExceptionHandler);

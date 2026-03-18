@@ -53,12 +53,12 @@ core::arch::global_asm!(
     "halt",
 );
 
-// The default implementation of abort
+// The default interrupt and exception handler
 core::arch::global_asm!(
-    ".section .text._default_abort",
-    ".global _default_abort",
-    ".type _default_abort,%function",
-    "_default_abort:",
+    ".section .text._DefaultHandler",
+    ".global _DefaultHandler",
+    ".type _DefaultHandler,%function",
+    "_DefaultHandler:",
     "halt",
 );
 
