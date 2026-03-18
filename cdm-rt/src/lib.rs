@@ -15,9 +15,10 @@ pub struct InterruptVector(unsafe extern "cdm-isr" fn(), u16);
 #[macro_export]
 macro_rules! interrupt_vectors {
     ($($elems:expr),* $(,)?) => {
+        #[used]
         #[unsafe(no_mangle)]
         #[unsafe(link_section = ".ivt.interrupts")]
-        pub static __INTERRUPTS: [$crate::InterruptVector; $crate::INTERRUPT_COUNT] = {
+        static __INTERRUPTS: [$crate::InterruptVector; $crate::INTERRUPT_COUNT] = {
             const fn make_array<const N: usize, const M: usize>(
                 prefix: [$crate::InterruptVector; M],
             ) -> [$crate::InterruptVector; N] {
@@ -72,14 +73,16 @@ unsafe extern "C" {
 }
 
 // The reset vector
+#[used]
 #[unsafe(no_mangle)]
 #[unsafe(link_section = ".ivt.reset_vector")]
-pub static __RESET_VECTOR: ExceptionVector = ExceptionVector(Reset, 0);
+static __RESET_VECTOR: ExceptionVector = ExceptionVector(Reset, 0);
 
 // Harware-defined exception vectors
+#[used]
 #[unsafe(no_mangle)]
 #[unsafe(link_section = ".ivt.exceptions")]
-pub static __EXCEPTIONS: [ExceptionVector; EXCEPTION_COUNT] = [
+static __EXCEPTIONS: [ExceptionVector; EXCEPTION_COUNT] = [
     ExceptionVector(UnalignedSP, 0),
     ExceptionVector(UnalignedPC, 0),
     ExceptionVector(InvalidInst, 0),
@@ -88,9 +91,10 @@ pub static __EXCEPTIONS: [ExceptionVector; EXCEPTION_COUNT] = [
 
 // Application-specific interrupt vectors
 #[cfg(not(feature = "interrupts"))]
+#[used]
 #[unsafe(no_mangle)]
 #[unsafe(link_section = ".ivt.interrupts")]
-pub static __INTERRUPTS: [InterruptVector; INTERRUPT_COUNT] = [{
+static __INTERRUPTS: [InterruptVector; INTERRUPT_COUNT] = [{
     unsafe extern "cdm-isr" {
         fn InterruptHandler();
     }
