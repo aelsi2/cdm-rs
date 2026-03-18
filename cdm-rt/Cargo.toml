@@ -8,5 +8,8 @@ build = "build.rs"
 opt-level = 2
 debug = false
 
+[dependencies]
+cdm = { path = "../cdm" }
+
 [features]
 interrupts = []

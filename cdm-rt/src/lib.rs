@@ -1,6 +1,9 @@
 #![no_std]
 #![feature(asm_experimental_arch)]
 
+/// Processor status register flags.
+pub use cdm::register::psr::Psr;
+
 /// The number of exception vectors in the interrupt vector table.
 pub const EXCEPTION_COUNT: usize = 4;
 
@@ -13,10 +16,10 @@ pub const INTERRUPT_COUNT: usize = 59;
 /// Represents a vector in the interrupt vector table.
 ///
 /// The first field is the pointer to the handler function.
-/// The second field is the initial value of the status register (usually 0 to disable interrupts).
+/// The second field is the initial value of the processor status register.
 #[derive(Clone, Copy)]
 #[repr(C)]
-pub struct InterruptVector(pub unsafe extern "cdm-isr" fn(), pub u16);
+pub struct InterruptVector(pub unsafe extern "cdm-isr" fn(), pub Psr);
 
 impl InterruptVector {
     /// The default vector used in absence of an explicit definition.
@@ -26,7 +29,7 @@ impl InterruptVector {
         unsafe extern "cdm-isr" {
             fn InterruptHandler();
         }
-        InterruptVector(InterruptHandler, 0)
+        InterruptVector(InterruptHandler, Psr::None)
     };
 }
 
@@ -38,9 +41,9 @@ impl InterruptVector {
 ///
 /// ```
 /// interrupt_vectors![
-///     InterruptVector(MyHandler1, 0), // int INTERRUPT_START+0
-///     InterruptVector(MyHandler2, 0), // int INTERRUPT_START+1
-///     InterruptVector(MyHandler3, 0), // int INTERRUPT_START+2
+///     InterruptVector(MyHandler1, Psr::None), // int INTERRUPT_START+0
+///     InterruptVector(MyHandler2, Psr::None), // int INTERRUPT_START+1
+///     InterruptVector(MyHandler3, Psr::None), // int INTERRUPT_START+2
 /// ];
 /// ```
 #[cfg(feature = "interrupts")]
@@ -71,7 +74,7 @@ macro_rules! interrupt_vectors {
 
 #[derive(Clone, Copy)]
 #[repr(C)]
-struct ExceptionVector(pub unsafe extern "C" fn() -> !, pub u16);
+struct ExceptionVector(pub unsafe extern "C" fn() -> !, pub Psr);
 
 // The initialization code
 core::arch::global_asm!(
@@ -107,17 +110,17 @@ unsafe extern "C" {
 #[used]
 #[unsafe(no_mangle)]
 #[unsafe(link_section = ".ivt.reset_vector")]
-static __RESET_VECTOR: ExceptionVector = ExceptionVector(Reset, 0);
+static __RESET_VECTOR: ExceptionVector = ExceptionVector(Reset, Psr::None);
 
 // Harware-defined exception vectors
 #[used]
 #[unsafe(no_mangle)]
 #[unsafe(link_section = ".ivt.exceptions")]
 static __EXCEPTIONS: [ExceptionVector; EXCEPTION_COUNT] = [
-    ExceptionVector(UnalignedSP, 0),
-    ExceptionVector(UnalignedPC, 0),
-    ExceptionVector(InvalidInst, 0),
-    ExceptionVector(DoubleFault, 0),
+    ExceptionVector(UnalignedSP, Psr::None),
+    ExceptionVector(UnalignedPC, Psr::None),
+    ExceptionVector(InvalidInst, Psr::None),
+    ExceptionVector(DoubleFault, Psr::None),
 ];
 
 // Application-specific interrupt vectors
