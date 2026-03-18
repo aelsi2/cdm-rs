@@ -79,9 +79,8 @@ core::arch::global_asm!(
     ".global _start",
     ".type _start,%function",
     "_start:",
-    "ldi r0, 0",
-    "stsp r0",
-    "move r0, fp",
+    "ldi fp, 0",
+    "stsp fp",
     "jsr main",
     "halt",
 );
