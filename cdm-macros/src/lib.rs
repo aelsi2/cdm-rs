@@ -64,10 +64,12 @@ impl Parse for ExceptionKind {
     }
 }
 
-/// Delcares the entry point of the program.
+/// Defines the entry point of the program.
 ///
 /// The function must have the following signature: `[unsafe] fn() -> !`.
 /// It will be called by the reset handler after initialization.
+///
+/// The entry point must be defined **once** in the dependency graph.
 ///
 /// ``` no_run
 /// #[cdm_macros::entry]
@@ -124,7 +126,7 @@ pub fn entry(args: TokenStream, input: TokenStream) -> TokenStream {
     .into()
 }
 
-/// Delcares an exception handler. 
+/// Defines an exception handler. 
 /// 
 /// One of the following exception kinds must be specified as a paramter to the attribute:
 /// - `Default` - default exception handler used for all exceptions when not overriden by a
@@ -136,6 +138,8 @@ pub fn entry(args: TokenStream, input: TokenStream) -> TokenStream {
 ///
 /// The function must have the following signature: `[unsafe] fn() -> !`.
 /// It will be called when the specified exception occurs.
+/// 
+/// Each exception handler must be defined at most **once** in the dependency graph.
 ///
 /// ``` no_run
 /// #[cdm_macros::exception(Default)]
@@ -196,9 +200,9 @@ pub fn exception(args: TokenStream, input: TokenStream) -> TokenStream {
     .into()
 }
 
-/// Delcares an application-specific interrupt handler.
+/// Defines an application-specific interrupt handler.
 ///
-/// The function must have the following signature: `[unsafe] fn() -> !`.
+/// The function must have the following signature: `[unsafe] fn()`.
 ///
 /// Use `cdm_rt::interrupt_vectors` to register the function in the interrupt vector table.
 ///
