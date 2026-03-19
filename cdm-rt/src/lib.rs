@@ -1,13 +1,13 @@
 #![no_std]
 #![feature(asm_experimental_arch)]
 
-/// Declares the entry point of the application.
+/// Defines the entry point of the program.
 pub use cdm_macros::entry;
 
-/// Declares an exception handler.
+/// Defines an exception handler.
 pub use cdm_macros::exception;
 
-/// Declares an application-specific interrupt handler.
+/// Defines an application-specific interrupt handler.
 pub use cdm_macros::interrupt;
 
 /// Processor status register flags.
@@ -26,6 +26,8 @@ pub const INTERRUPT_COUNT: usize = 59;
 ///
 /// The first field is the pointer to the handler function.
 /// The second field is the initial value of the processor status register.
+///
+/// Use `#[interrupt]` to define interrupt handler functions.
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct InterruptVector(pub unsafe extern "cdm-isr" fn(), pub Psr);
