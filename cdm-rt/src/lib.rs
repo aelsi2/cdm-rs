@@ -48,6 +48,8 @@ impl InterruptVector {
 /// exception vectors, starting from index `INTERRUPT_START`. The rest of the table is filled
 /// with `InterruptVector::DEFAULT`.
 ///
+/// Must be used **once** in the dependency graph.
+///
 /// ``` no_run
 /// interrupt_vectors![
 ///     InterruptVector(MyHandler1, Psr::None), // int INTERRUPT_START+0
