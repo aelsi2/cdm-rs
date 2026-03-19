@@ -10,6 +10,7 @@ debug = false
 
 [dependencies]
 cdm = { path = "../cdm" }
+cdm-macros = { path = "../cdm-macros" }
 
 [features]
 interrupts = []

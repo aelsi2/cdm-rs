@@ -1,6 +1,9 @@
 #![no_std]
 #![feature(asm_experimental_arch)]
 
+/// Declares the entry point of the application.
+pub use cdm_macros::entry;
+
 /// Processor status register flags.
 pub use cdm::register::psr::Psr;
 
@@ -39,7 +42,7 @@ impl InterruptVector {
 /// exception vectors, starting from index `INTERRUPT_START`. The rest of the table is filled
 /// with `InterruptVector::DEFAULT`.
 ///
-/// ```
+/// ``` no_run
 /// interrupt_vectors![
 ///     InterruptVector(MyHandler1, Psr::None), // int INTERRUPT_START+0
 ///     InterruptVector(MyHandler2, Psr::None), // int INTERRUPT_START+1
