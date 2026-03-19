@@ -4,6 +4,12 @@
 /// Declares the entry point of the application.
 pub use cdm_macros::entry;
 
+/// Declares an exception handler.
+pub use cdm_macros::exception;
+
+/// Declares an application-specific interrupt handler.
+pub use cdm_macros::interrupt;
+
 /// Processor status register flags.
 pub use cdm::register::psr::Psr;
 
