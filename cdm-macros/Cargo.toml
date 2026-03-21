@@ -1,7 +1,13 @@
 [package]
 name = "cdm-macros"
 version = "0.1.0"
+description = "Procedural macros re-exported in cdm-rt"
+repository = "https://github.com/aelsi2/cdm-rs"
+keywords = ["cdm", "cdm16", "runtime", "startup"]
+categories = ["embedded", "no-std"]
+readme = "README.md"
 edition = "2024"
+rust-version = "1.90"
 
 [lib]
 proc-macro = true

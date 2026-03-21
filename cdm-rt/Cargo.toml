@@ -1,9 +1,16 @@
 [package]
 name = "cdm-rt"
 version = "0.1.0"
+description = "Minimal runtime and startup code for the CDM-16 processor"
+repository = "https://github.com/aelsi2/cdm-rs"
+keywords = ["cdm", "cdm16", "runtime", "startup"]
+categories = ["embedded", "no-std"]
+readme = "README.md"
 edition = "2024"
-build = "build.rs"
+rust-version = "1.90"
+links = "cdm-rt" # To prevent linking multiple versions
 
+# Dev builds fail without this
 [profile.dev]
 opt-level = 2
 debug = false

@@ -1,8 +1,16 @@
 [package]
 name = "cdm"
 version = "0.1.0"
+description = "Low level access to the CDM-16 processor"
+repository = "https://github.com/aelsi2/cdm-rs"
+keywords = ["cdm", "cdm16", "register", "interrupt"]
+categories = ["embedded", "hardware-support", "no-std"]
+readme = "README.md"
 edition = "2024"
+rust-version = "1.90"
+links = "cdm" # To prevent linking multiple versions
 
+# Dev builds fail without this
 [profile.dev]
 opt-level = 2
 debug = false
