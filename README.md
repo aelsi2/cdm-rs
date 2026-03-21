@@ -5,9 +5,9 @@ This repository contains a set of crates for accessing the hardware features of 
 - `cdm-rt` - startup code, default exception handlers, interrupt handler definition utilities
 - `cdm-macros` - procedural macros for defining the entry point of the program, interrupt and exception handlers, re-exported in `cdm-rt`
 
-These crates are made to be used with the experimental [Rust compiler for CDM-16](https://github.com/ylab-nsu/cdm16-rust) based on the [CDM-16 LLVM fork](github.com/ylab-nsu/cdm16-llvm-neo/).
+These crates are made to be used with the experimental [Rust compiler for CDM-16](https://github.com/ylab-nsu/cdm16-rust) based on the [CDM-16 LLVM fork](https://github.com/ylab-nsu/cdm16-llvm-neo/).
 
-### How to use
+## How to use
 Add this to your project's Cargo.toml:
 ```toml
 [dependencies.cdm]
@@ -17,7 +17,8 @@ git = "https://github.com/aelsi2/cdm-rs.git"
 
 [dependencies.cdm-rt]
 git = "https://github.com/aelsi2/cdm-rs.git"
-# Optional: disables default interrupt handlers and allows definition of custom interrupt handlers with interrupt_vectors![...]
+# Optional: disables default interrupt handlers and allows definition 
+# of custom interrupt handlers with interrupt_vectors![...]
 # features = ["interrupts"]
 ```
 

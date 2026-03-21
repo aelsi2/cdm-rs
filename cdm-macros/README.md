@@ -1,6 +1,6 @@
 # `cdm-rt` macros
 
-This crate contains procedural macros for functions re-exported in `cdm-rt`:
+This crate contains procedural macros re-exported in `cdm-rt`:
 - `#[entry]` - defines the entry point of the application
 - `#[exception(/* type */)]` - defines an exception handler for the specified exception type; exception types:
     - `#[exception(Default)]` - default exception handler used as a fallback
@@ -12,7 +12,7 @@ This crate contains procedural macros for functions re-exported in `cdm-rt`:
 
 Entry point and exception handler functions must not return (e.g. must have `!` return type).
 
-### Examples
+## Examples
 Entry point:
 ```rust
 use cdm_rt::entry;
