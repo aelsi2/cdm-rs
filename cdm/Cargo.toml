@@ -16,7 +16,8 @@ debug = false
 
 [dependencies]
 bitmask-enum = "2.2.5"
-critical-section = { version = "1.2.0", features = ["restore-state-u16"] }
+critical-section = "1.2.0"
 
 [features]
 panic-halt = []
+critical-section = ["critical-section/restore-state-u16"]
