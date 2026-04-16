@@ -34,7 +34,7 @@ Exactly one function needs to be marked as the application entry point by applyi
 `#[cdm_rt::entry]` attribute.
 
 ## Example
-`.cargo/config.toml`:
+`.cargo/config.toml`
 ```toml
 [build]
 target = "cdm-none"
@@ -43,14 +43,14 @@ rustflags = [ "-Clink-arg=-Tlink.x" ]
 build-std = [ "core" ]
 ```
 
-`memory.x`:
+`memory.x`
 ```ld
 MEMORY {
     RAM : ORIGIN = 0x100, LENGTH = 64K-0x100
 }
 ```
 
-`src/main.rs`:
+`src/main.rs`
 ```rust
 use cdm_rt::entry;
 
