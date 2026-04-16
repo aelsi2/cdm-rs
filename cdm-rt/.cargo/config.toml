@@ -1,5 +1,0 @@
-[build]
-target = "cdm-none"
-
-[unstable]
-build-std = [ "core" ]
