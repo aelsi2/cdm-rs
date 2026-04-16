@@ -11,7 +11,7 @@ These crates are made to be used with the experimental [Rust compiler](https://g
 - [**Example project**](https://github.com/aelsi2/cdm-paint-rs)
 
 ## How to use
-Add this to your project's Cargo.toml:
+Add this to your project's `Cargo.toml`:
 ```toml
 [dependencies.cdm]
 git = "https://github.com/aelsi2/cdm-rs.git"
@@ -31,9 +31,28 @@ features = [
 ]
 ```
 
-For a minimal working program, mark your `main` function with the `cdm_rt::entry` attribute:
+Create a `.cargo/config.toml` file with the following contents:
+```toml
+[build]
+target = "cdm-none"
+rustflags = [ "-Clink-arg=-Tlink.x" ]
+
+[unstable]
+build-std = [ "core" ]
+```
+
+Create a `memory.x` file in your project root with the following contents:
+```ld
+MEMORY {
+    RAM : ORIGIN = 0x100, LENGTH = 64K-0x100
+}
+```
+
+Mark your `main` function with the `cdm_rt::entry` attribute:
 ```rust
-// main.rs
+#![no_std]
+#![no_main]
+
 use cdm_rt::entry;
 
 #[entry]
