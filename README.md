@@ -5,7 +5,7 @@ This repository contains a set of crates for accessing the hardware features of 
 - `cdm-rt` - startup code, default exception handlers, interrupt handler definition utilities
 - `cdm-macros` - procedural macros for defining the entry point of the program, interrupt and exception handlers, re-exported in `cdm-rt`
 
-These crates are made to be used with the experimental [Rust compiler for CDM-16](https://github.com/ylab-nsu/cdm16-rust) based on the [CDM-16 LLVM fork](https://github.com/ylab-nsu/cdm16-llvm-neo/).
+These crates are made to be used with the experimental [Rust compiler](https://github.com/ylab-nsu/cdm16-rust) for the [CDM-16 educational processor](https://github.com/cdm-processors/) based on the [CDM-16 LLVM fork](https://github.com/ylab-nsu/cdm16-llvm-neo/).
 
 - [**Documentation**](https://aelsi2.github.io/cdm-rs/index.html)
 - [**Example project**](https://github.com/aelsi2/cdm-paint-rs)
