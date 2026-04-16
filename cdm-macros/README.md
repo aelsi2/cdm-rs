@@ -1,5 +1,8 @@
-# `cdm-rt` macros
+# `cdm-macros`
 
+Procedural macros for `cdm-rt`.
+
+## Features
 This crate contains procedural macros re-exported in `cdm-rt`:
 - `#[entry]` - defines the entry point of the application
 - `#[exception(/* type */)]` - defines an exception handler for the specified exception type; exception types:

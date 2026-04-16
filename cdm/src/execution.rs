@@ -2,7 +2,7 @@
 
 use core::arch::asm;
 
-/// Halts the processor.
+/// Stops the clock, putting the processor into the `HALTED` state.
 #[inline]
 pub fn halt() -> ! {
     unsafe {
@@ -10,7 +10,7 @@ pub fn halt() -> ! {
     }
 }
 
-/// Performs a soft reset.
+/// Performs a soft reset, fetching interrupt vector 0.
 #[inline]
 pub unsafe fn reset() -> ! {
     unsafe {

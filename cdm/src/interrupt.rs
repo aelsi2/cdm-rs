@@ -8,13 +8,14 @@ pub unsafe fn enable() {
     unsafe { asm!("ei", options(nostack, nomem)) };
 }
 
-/// Enables all interrupts.
+/// Disables all interrupts.
 #[inline]
 pub fn disable() {
     unsafe { asm!("di", options(nostack, nomem)) };
 }
 
-/// Waits until an interrupt request is received.
+/// Stops the clock until an interrupt request is received,
+/// putting the processor into the `WAITING` state.
 #[inline]
 pub fn wait() {
     unsafe { asm!("wait", options(nostack, nomem, preserves_flags)) };

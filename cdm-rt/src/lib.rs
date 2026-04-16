@@ -1,16 +1,37 @@
+//! Startup code and minimal runtime for the CDM-16 processor.
+//!
+//! # Features
+//!
+//! This crate provides:
+//! - Default interrupt and exception handlers using the `halt` instruction.
+//! - A macro for defining the entry point of the program: `#[entry]`.
+//! - A macro for redefining exception handlers: `#[exception]`.
+//! - A macro for defining custom interrupt handlers: `#[interrupt]`.
+//! - A macro for registering cuustom interrupt handlers: `interrupt_vectors![]`.
+//!
+//! # Optional features
+//! #### `interrupts`
+//! This feature disables the default interrupt handlers and allows the usage of `interrupt_vectors![]`.
+//!
+//! # Minimal example
+//! ```
+//! use cdm_rt::entry;
+//!
+//! #[entry]
+//! fn main() -> ! {
+//!     loop { /* .. */ }
+//! }
+//! ```
+
 #![no_std]
 #![feature(asm_experimental_arch)]
 
-/// Defines the entry point of the program.
 pub use cdm_macros::entry;
 
-/// Defines an exception handler.
 pub use cdm_macros::exception;
 
-/// Defines an application-specific interrupt handler.
 pub use cdm_macros::interrupt;
 
-/// Processor status register flags.
 pub use cdm::register::psr::Psr;
 
 /// The number of exception vectors in the interrupt vector table.
@@ -52,12 +73,21 @@ impl InterruptVector {
 ///
 /// Must be used **once** in the dependency graph.
 ///
+/// Use `cdm_rt::interrupt` to define interrupt handler functions.
+///
 /// ``` no_run
 /// interrupt_vectors![
 ///     InterruptVector(MyHandler1, Psr::None), // int INTERRUPT_START+0
 ///     InterruptVector(MyHandler2, Psr::None), // int INTERRUPT_START+1
 ///     InterruptVector(MyHandler3, Psr::None), // int INTERRUPT_START+2
 /// ];
+///
+/// #[cdm_rt::interrupt]
+/// fn MyHandler1() { /* .. */ }
+/// #[cdm_rt::interrupt]
+/// fn MyHandler2() { /* .. */ }
+/// #[cdm_rt::interrupt]
+/// fn MyHandler3() { /* .. */ }
 /// ```
 #[cfg(feature = "interrupts")]
 #[macro_export]
