@@ -52,6 +52,9 @@
 //!
 //! `src/main.rs`
 //! ```rust
+//! #![no_std]
+//! #![no_main]
+//!
 //! use cdm_rt::entry;
 //!
 //! #[entry]
