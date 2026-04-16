@@ -1,17 +1,7 @@
 # `cdm`
 
-Low level access to the CDM-16 processor.
+> Low level access to the CDM-16 processor
 
-## Features
-This crate provides:
-- Access to special registers: `PSR`, `SP`, `FP`, `PC`.
-- Interrupt control functions.
-- Wrappers around assembly instructions like `wait` and `halt`.
+This crate is part of `cdm-rs`, a set of crates for accessing the hardware features of the [CDM-16 educational processor](https://github.com/cdm-processors/cdm-devkit/blob/d1b647bb8ae9db43be7757a76fa63ddb112fa450/docs/cdm16/cdm16-overview.md). Is is made to be used with the experimental [Rust compiler for CDM-16](https://github.com/ylab-nsu/cdm16-rust) based on the [CDM-16 LLVM fork](https://github.com/ylab-nsu/cdm16-llvm-neo/).
 
-## Optional features
-### `critical-section`
-This feature enables a [`critical-section`](https://github.com/rust-embedded/critical-section)
-implementation based on disabling interrupts globally.
-
-### `panic-halt`
-This feature enables a panic handler that halts the processor with the `halt` instruction.
+Check out a complete example project [here](https://github.com/aelsi2/cdm-paint-rs).

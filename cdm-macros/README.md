@@ -1,57 +1,7 @@
 # `cdm-macros`
 
-Procedural macros for `cdm-rt`.
+> Procedural macros for `cdm-rt`
 
-## Features
-This crate contains procedural macros re-exported in `cdm-rt`:
-- `#[entry]` - defines the entry point of the application
-- `#[exception(/* type */)]` - defines an exception handler for the specified exception type; exception types:
-    - `#[exception(Default)]` - default exception handler used as a fallback
-    - `#[exception(UnalignedSP)]` - unaligned stack pointer
-    - `#[exception(UnalignedPC)]` - unaligned program counter
-    - `#[exception(InvalidInst)]` - invalid instruction
-    - `#[exception(DoubleFault)]` - double fault
-- `#[interrupt]` - declares the function as an interrupt handler (but does not add it to the IVT, use `cdm_rt::interrupt_vectors![]` for this)
+This crate is part of `cdm-rs`, a set of crates for accessing the hardware features of the [CDM-16 educational processor](https://github.com/cdm-processors/cdm-devkit/blob/d1b647bb8ae9db43be7757a76fa63ddb112fa450/docs/cdm16/cdm16-overview.md). Is is made to be used with the experimental [Rust compiler for CDM-16](https://github.com/ylab-nsu/cdm16-rust) based on the [CDM-16 LLVM fork](https://github.com/ylab-nsu/cdm16-llvm-neo/).
 
-Entry point and exception handler functions must not return (e.g. must have `!` return type).
-
-## Examples
-Entry point:
-```rust
-use cdm_rt::entry;
-
-#[entry]
-fn main() -> ! {
-    loop { /* .. */ }
-}
-```
-
-Exception handlers:
-```rust
-use cdm_rt::exception;
-
-#[exception(Default)]
-fn on_exception() -> ! {
-    loop { /* .. */ }
-}
-
-#[exception(InvalidInst)]
-fn on_invalid_inst() -> ! {
-    loop { /* .. */ }
-}
-```
-
-Interrupt handlers:
-```rust
-use cdm_rt::{InterruptVector, Psr, interrupt_vectors};
-use cdm_rt::interrupt;
-
-interrupt_vectors![
-    InterruptVector(on_interrupt, Psr::None),
-];
-
-#[interrupt]
-fn on_interrupt() {
-    /* .. */
-}
-```
+Check out a complete example project [here](https://github.com/aelsi2/cdm-paint-rs).
