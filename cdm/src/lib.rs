@@ -8,11 +8,11 @@
 //! - Wrappers around assembly instructions like `wait` and `halt`.
 //!
 //! # Optional features
-//! #### `critical-section`
+//! ## `critical-section`
 //! This feature enables a [`critical-section`](https://github.com/rust-embedded/critical-section)
 //! implementation based on disabling interrupts globally.
 //!
-//! #### `panic-halt`
+//! ## `panic-halt`
 //! This feature enables a panic handler that halts the processor with the `halt` instruction.
 
 #![no_std]
