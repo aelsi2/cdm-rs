@@ -1,4 +1,4 @@
-//! Procedural macros for the cdm-rt crate.
+//! Procedural macros for the `cdm-rt` crate.
 
 use proc_macro::TokenStream;
 use proc_macro2::Span;
@@ -72,7 +72,7 @@ impl Parse for ExceptionKind {
 /// The entry point must be defined **once** in the dependency graph.
 ///
 /// ``` no_run
-/// #[cdm_macros::entry]
+/// #[cdm_rt::entry]
 /// fn main() -> ! {
 ///     loop {
 ///         /* .. */
@@ -98,7 +98,7 @@ pub fn entry(args: TokenStream, input: TokenStream) -> TokenStream {
     if !signature_valid {
         return parse::Error::new(
             f.span(),
-            "`#[entry]` function must have signature `[unsafe] fn() -> !`",
+            "The `#[entry]` function must have the signature `[unsafe] fn() -> !`",
         )
         .to_compile_error()
         .into();
@@ -142,14 +142,14 @@ pub fn entry(args: TokenStream, input: TokenStream) -> TokenStream {
 /// Each exception handler must be defined at most **once** in the dependency graph.
 ///
 /// ``` no_run
-/// #[cdm_macros::exception(Default)]
+/// #[cdm_rt::exception(Default)]
 /// fn on_exception() -> ! {
 ///     loop {
 ///         /* .. */
 ///     }
 /// }
 ///
-/// #[cdm_macros::exception(InvalidInst)]
+/// #[cdm_rt::exception(InvalidInst)]
 /// fn on_invalid_inst() -> ! {
 ///     loop {
 ///         /* .. */
@@ -175,7 +175,7 @@ pub fn exception(args: TokenStream, input: TokenStream) -> TokenStream {
     if !signature_valid {
         return parse::Error::new(
             f.span(),
-            "`#[exception(...)]` function must have signature `[unsafe] fn() -> !`",
+            "`#[exception(...)]` functions must have the signature `[unsafe] fn() -> !`",
         )
         .to_compile_error()
         .into();
@@ -211,7 +211,7 @@ pub fn exception(args: TokenStream, input: TokenStream) -> TokenStream {
 ///     cdm_rt::InterruptVector(on_input, cdm_rt::Psr::None)
 /// ];
 ///
-/// #[cdm_macros::interrupt]
+/// #[cdm_rt::interrupt]
 /// fn on_input() {
 ///     /* .. */
 /// }
@@ -235,7 +235,7 @@ pub fn interrupt(args: TokenStream, input: TokenStream) -> TokenStream {
     if !signature_valid {
         return parse::Error::new(
             f.span(),
-            "`#[interrupt]` function must have signature `[unsafe] fn()`",
+            "`#[interrupt]` functions must have the signature `[unsafe] fn()`",
         )
         .to_compile_error()
         .into();
