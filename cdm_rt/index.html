@@ -1,0 +1,50 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Startup code and minimal runtime for the CDM-16 processor."><title>cdm_rt - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../static.files/rustdoc-aa0817cf.css"><meta name="rustdoc-vars" data-root-path="../" data-static-root-path="../static.files/" data-current-crate="cdm_rt" data-themes="" data-resource-suffix="" data-rustdoc-version="1.90.0-dev" data-channel="nightly" data-search-js="search-fa3e91e5.js" data-settings-js="settings-5514c975.js" ><script src="../static.files/storage-68b7e25d.js"></script><script defer src="../crates.js"></script><script defer src="../static.files/main-eebb9057.js"></script><noscript><link rel="stylesheet" href="../static.files/noscript-32bb7600.css"></noscript><link rel="alternate icon" type="image/png" href="../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../static.files/favicon-044be391.svg"></head><body class="rustdoc mod crate"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle" title="show sidebar"></button></nav><nav class="sidebar"><div class="sidebar-crate"><h2><a href="../cdm_rt/index.html">cdm_rt</a><span class="version">0.1.0</span></h2></div><div class="sidebar-elems"><ul class="block"><li><a id="all-types" href="all.html">All Items</a></li></ul><section id="rustdoc-toc"><h3><a href="#">Sections</a></h3><ul class="block top-toc"><li><a href="#features" title="Features">Features</a></li><li><a href="#cargo-features" title="Cargo features">Cargo features</a><ul><li><a href="#interrupts" title="`interrupts`"><code>interrupts</code></a></li></ul></li><li><a href="#requirements" title="Requirements">Requirements</a><ul><li><a href="#memoryx" title="`memory.x`"><code>memory.x</code></a></li><li><a href="#rust-flags" title="Rust flags">Rust flags</a></li><li><a href="#entry-point" title="Entry point">Entry point</a></li></ul></li><li><a href="#example" title="Example">Example</a></li></ul><h3><a href="#macros">Crate Items</a></h3><ul class="block"><li><a href="#macros" title="Macros">Macros</a></li><li><a href="#structs" title="Structs">Structs</a></li><li><a href="#constants" title="Constants">Constants</a></li><li><a href="#attributes" title="Attribute Macros">Attribute Macros</a></li></ul></section><div id="rustdoc-modnav"></div></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><div class="width-limiter"><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><h1>Crate <span>cdm_rt</span><button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><a class="src" href="../src/cdm_rt/lib.rs.html#1-215">Source</a> </span></div><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Startup code and minimal runtime for the CDM-16 processor.</p>
+<h2 id="features"><a class="doc-anchor" href="#features">§</a>Features</h2>
+<p>This crate provides:</p>
+<ul>
+<li>Default interrupt and exception handlers using the <code>halt</code> instruction</li>
+<li>A macro for defining the entry point of the program: <a href="attr.entry.html" title="attr cdm_rt::entry"><code>entry</code></a></li>
+<li>A macro for redefining exception handlers: <a href="attr.exception.html" title="attr cdm_rt::exception"><code>exception</code></a></li>
+<li>A macro for defining interrupt handlers: <a href="attr.interrupt.html" title="attr cdm_rt::interrupt"><code>interrupt</code></a></li>
+<li>A macro for registering interrupt handlers in the IVT:
+<a href="macro.interrupt_vectors.html" title="macro cdm_rt::interrupt_vectors"><code>interrupt_vectors</code></a></li>
+</ul>
+<h2 id="cargo-features"><a class="doc-anchor" href="#cargo-features">§</a>Cargo features</h2><h5 id="interrupts"><a class="doc-anchor" href="#interrupts">§</a><code>interrupts</code></h5>
+<p>This feature disables the default interrupt handlers and allows the use of <a href="macro.interrupt_vectors.html" title="macro cdm_rt::interrupt_vectors"><code>interrupt_vectors</code></a></p>
+<h2 id="requirements"><a class="doc-anchor" href="#requirements">§</a>Requirements</h2><h5 id="memoryx"><a class="doc-anchor" href="#memoryx">§</a><code>memory.x</code></h5>
+<p>The crate expects a file named <code>memory.x</code> to be present in the project root directory.
+This file is a linker script that needs to specify the address range that the linker can use.
+This is done using the <code>MEMORY</code> command defining a region named <code>RAM</code>. The origin
+address must be greater than or equal to <code>0x100</code> so that it doesn’t intersect with the IVT.</p>
+<p>You can reserve a range of addresses between the IVT and the main memory for MMIO by specifying a
+larger origin address for <code>RAM</code> (e.g <code>0x120</code>).</p>
+<hr />
+<h5 id="rust-flags"><a class="doc-anchor" href="#rust-flags">§</a>Rust flags</h5>
+<p>The crate generates a linker script named <code>link.x</code> in the output directory. It needs to be passed to the
+linker. This can be done by passing <code>-Clink-arg=-Tlink.x</code> to rustc.</p>
+<hr />
+<h5 id="entry-point"><a class="doc-anchor" href="#entry-point">§</a>Entry point</h5>
+<p>Exactly one function needs to be marked as the application entry point by applying the <a href="attr.entry.html" title="attr cdm_rt::entry"><code>entry</code></a> attribute.</p>
+<h2 id="example"><a class="doc-anchor" href="#example">§</a>Example</h2>
+<p><code>.cargo/config.toml</code></p>
+<div class="example-wrap"><pre class="language-toml"><code>[build]
+target = &quot;cdm-none&quot;
+rustflags = [ &quot;-Clink-arg=-Tlink.x&quot; ]
+[unstable]
+build-std = [ &quot;core&quot; ]</code></pre></div>
+<p><code>memory.x</code></p>
+<div class="example-wrap"><pre class="language-ld"><code>MEMORY {
+    RAM : ORIGIN = 0x100, LENGTH = 64K-0x100
+}</code></pre></div>
+<p><code>src/main.rs</code></p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="attr">#![no_std]
+#![no_main]
+
+</span><span class="kw">use </span>cdm_rt::entry;
+
+<span class="attr">#[entry]
+</span><span class="kw">fn </span>main() -&gt; ! {
+    <span class="kw">loop </span>{ <span class="comment">/* .. */ </span>}
+}</code></pre></div>
+</div></details><h2 id="macros" class="section-header">Macros<a href="#macros" class="anchor">§</a></h2><dl class="item-table"><dt><a class="macro" href="macro.interrupt_vectors.html" title="macro cdm_rt::interrupt_vectors">interrupt_<wbr>vectors</a></dt><dd>Defines the application-specific interrupt handler section of the interrupt vector table.</dd></dl><h2 id="structs" class="section-header">Structs<a href="#structs" class="anchor">§</a></h2><dl class="item-table"><dt><a class="struct" href="struct.InterruptVector.html" title="struct cdm_rt::InterruptVector">Interrupt<wbr>Vector</a></dt><dd>Represents a vector in the interrupt vector table.</dd><dt><a class="struct" href="struct.Psr.html" title="struct cdm_rt::Psr">Psr</a></dt><dd>Processor status register flags.</dd></dl><h2 id="constants" class="section-header">Constants<a href="#constants" class="anchor">§</a></h2><dl class="item-table"><dt><a class="constant" href="constant.EXCEPTION_COUNT.html" title="constant cdm_rt::EXCEPTION_COUNT">EXCEPTION_<wbr>COUNT</a></dt><dd>The number of exception vectors in the interrupt vector table.</dd><dt><a class="constant" href="constant.INTERRUPT_COUNT.html" title="constant cdm_rt::INTERRUPT_COUNT">INTERRUPT_<wbr>COUNT</a></dt><dd>The number of application-specific interrupt vectors in the interrupt vector table.</dd><dt><a class="constant" href="constant.INTERRUPT_START.html" title="constant cdm_rt::INTERRUPT_START">INTERRUPT_<wbr>START</a></dt><dd>The index of the first application-specific interrupt vector.</dd></dl><h2 id="attributes" class="section-header">Attribute Macros<a href="#attributes" class="anchor">§</a></h2><dl class="item-table"><dt><a class="attr" href="attr.entry.html" title="attr cdm_rt::entry">entry</a></dt><dd>Defines the entry point of the program.</dd><dt><a class="attr" href="attr.exception.html" title="attr cdm_rt::exception">exception</a></dt><dd>Defines an exception handler.</dd><dt><a class="attr" href="attr.interrupt.html" title="attr cdm_rt::interrupt">interrupt</a></dt><dd>Defines an application-specific interrupt handler.</dd></dl></section></div></main></body></html>
