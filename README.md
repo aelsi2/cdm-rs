@@ -1,7 +1,6 @@
 # CDM-16 hardware support crates
 
-[![**Documentation**](https://img.shields.io/badge/Documentation-blue)](https://aelsi2.github.io/cdm-rs/index.html)
-[![**Example**](https://img.shields.io/badge/Example-chocolate)](https://github.com/aelsi2/cdm-paint-rs)
+[**Documentation**](https://aelsi2.github.io/cdm-rs/index.html) | [**Example project**](https://github.com/aelsi2/cdm-paint-rs)
 
 This repository contains a set of crates for accessing the hardware features of the CDM-16 processor:
 - `cdm` - register access, optional implementation of [critical-section](https://crates.io/crates/critical-section), optional panic handler
