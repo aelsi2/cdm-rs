@@ -1,14 +1,14 @@
 # CDM-16 hardware support crates
 
+[![**Documentation**](https://img.shields.io/badge/Documentation-blue)](https://aelsi2.github.io/cdm-rs/index.html)
+[![**Example**](https://img.shields.io/badge/Example-chocolate)](https://github.com/aelsi2/cdm-paint-rs)
+
 This repository contains a set of crates for accessing the hardware features of the CDM-16 processor:
 - `cdm` - register access, optional implementation of [critical-section](https://crates.io/crates/critical-section), optional panic handler
 - `cdm-rt` - startup code, default exception handlers, interrupt handler definition utilities
 - `cdm-macros` - procedural macros for defining the entry point of the program, interrupt and exception handlers, re-exported in `cdm-rt`
 
 These crates are made to be used with the experimental [Rust compiler](https://github.com/ylab-nsu/cdm16-rust) for the [CDM-16 educational processor](https://github.com/cdm-processors/) based on the [CDM-16 LLVM fork](https://github.com/ylab-nsu/cdm16-llvm-neo/).
-
-- [**Documentation**](https://aelsi2.github.io/cdm-rs/index.html)
-- [**Example project**](https://github.com/aelsi2/cdm-paint-rs)
 
 ## How to use
 Add this to your project's `Cargo.toml`:
