@@ -65,6 +65,7 @@
 
 #![no_std]
 #![feature(asm_experimental_arch)]
+#![feature(doc_auto_cfg)]
 
 pub use cdm_macros::entry;
 
