@@ -204,7 +204,7 @@ pub fn exception(args: TokenStream, input: TokenStream) -> TokenStream {
 ///
 /// The function must have the following signature: `[unsafe] fn()`.
 ///
-/// Use `cdm_rt::interrupt_vectors` to register the function in the interrupt vector table.
+/// Use the `cdm_rt::interrupt_vectors` macro to register the function in the interrupt vector table.
 ///
 /// ``` no_run
 /// cdm_rt::interrupt_vectors![

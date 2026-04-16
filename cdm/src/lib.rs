@@ -3,11 +3,13 @@
 //! # Features
 //!
 //! This crate provides:
-//! - Access to special registers: `PSR`, `SP`, `FP`, `PC`.
-//! - Interrupt control functions.
-//! - Wrappers around assembly instructions like `wait` and `halt`.
+//! - Access to special registers: `PSR`, `SP`, `FP`, `PC`
+//! - Interrupt control functions
+//! - Wrappers around assembly instructions like `wait` and `halt`
+//! - An optional `critical-section` implementation
+//! - An optional panic handler
 //!
-//! # Optional features
+//! # Cargo features
 //! #### `critical-section`
 //! This feature enables a [`critical-section`](https://github.com/rust-embedded/critical-section)
 //! implementation based on disabling interrupts globally.
