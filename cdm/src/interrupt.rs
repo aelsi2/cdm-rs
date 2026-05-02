@@ -1,10 +1,12 @@
 //! Functions for working with interrupts.
 
 use core::arch::asm;
+use core::sync::atomic::{compiler_fence, Ordering};
 
 /// Enables all interrupts.
 #[inline]
 pub unsafe fn enable() {
+    compiler_fence(Ordering::SeqCst);
     unsafe { asm!("ei", options(nostack, nomem)) };
 }
 
@@ -12,6 +14,7 @@ pub unsafe fn enable() {
 #[inline]
 pub fn disable() {
     unsafe { asm!("di", options(nostack, nomem)) };
+    compiler_fence(Ordering::SeqCst);
 }
 
 /// Stops the clock until an interrupt request is received,

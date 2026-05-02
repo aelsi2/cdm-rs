@@ -4,6 +4,7 @@ pub mod psr {
     //! Processor status register (PSR).
     use bitmask_enum::bitmask;
     use core::arch::asm;
+    use core::sync::atomic::{Ordering, compiler_fence};
 
     /// Processor status register flags.
     #[bitmask(u16)]
@@ -26,9 +27,7 @@ pub mod psr {
     #[inline]
     pub fn read() -> Psr {
         let value: u16;
-        unsafe {
-            asm!("ldps r0", out("r0") value, options(nomem, nostack, preserves_flags));
-        }
+        unsafe { asm!("ldps {}", out(reg) value, options(nomem, nostack, preserves_flags)) }
         Psr::from(value)
     }
 
@@ -36,9 +35,9 @@ pub mod psr {
     #[inline]
     pub unsafe fn write(value: Psr) {
         let val: u16 = value.into();
-        unsafe {
-            asm!("stps r0", in("r0") val, options(nomem, nostack));
-        }
+        compiler_fence(Ordering::SeqCst);
+        unsafe { asm!("stps {}", in(reg) val, options(nomem, nostack)) }
+        compiler_fence(Ordering::SeqCst);
     }
 }
 
@@ -51,7 +50,7 @@ pub mod pc {
     pub fn read() -> usize {
         let value: usize;
         unsafe {
-            asm!("ldpc r0", out("r0") value, options(nomem, nostack, preserves_flags));
+            asm!("ldpc {}", out(reg) value, options(nomem, nostack, preserves_flags));
         }
         value
     }
@@ -60,7 +59,7 @@ pub mod pc {
     #[inline]
     pub unsafe fn write(value: usize) {
         unsafe {
-            asm!("stpc r0", in("r0") value);
+            asm!("stpc {}", in(reg) value);
         }
     }
 }
@@ -73,18 +72,14 @@ pub mod sp {
     #[inline]
     pub fn read() -> usize {
         let value: usize;
-        unsafe {
-            asm!("ldsp r0", out("r0") value, options(nomem, nostack, preserves_flags));
-        }
+        unsafe { asm!("ldsp {}", out(reg) value, options(nomem, nostack, preserves_flags)) }
         value
     }
 
     /// Writes `value` to the register.
     #[inline]
     pub unsafe fn write(value: usize) {
-        unsafe {
-            asm!("stsp r0", in("r0") value, options(nomem, preserves_flags));
-        }
+        unsafe { asm!("stsp {}", in(reg) value, options(nomem, preserves_flags)) }
     }
 }
 
@@ -96,17 +91,13 @@ pub mod fp {
     #[inline]
     pub fn read() -> usize {
         let value: usize;
-        unsafe {
-            asm!("move fp, r0", out("r0") value, options(nomem, nostack, preserves_flags));
-        }
+        unsafe { asm!("move fp, {}", out(reg) value, options(nomem, nostack, preserves_flags)) }
         value
     }
 
     /// Writes `value` to the register.
     #[inline]
     pub unsafe fn write(value: usize) {
-        unsafe {
-            asm!("move r0, fp", in("r0") value, options(nomem, preserves_flags));
-        }
+        unsafe { asm!("move {}, fp", in(reg) value, options(nomem, preserves_flags)) }
     }
 }
