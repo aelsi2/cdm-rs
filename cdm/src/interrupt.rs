@@ -4,7 +4,7 @@ use core::arch::asm;
 use core::sync::atomic::{Ordering, compiler_fence};
 
 /// Enables all interrupts.
-#[inline]
+#[inline(always)]
 pub unsafe fn enable() {
     // Make sure that all reads/writes before ei stay in the critical section.
     compiler_fence(Ordering::SeqCst);
@@ -12,7 +12,7 @@ pub unsafe fn enable() {
 }
 
 /// Disables all interrupts.
-#[inline]
+#[inline(always)]
 pub fn disable() {
     unsafe { asm!("di", options(nostack, nomem)) };
     // Make sure that all reads/writes after di stay in the critical section.
@@ -21,7 +21,7 @@ pub fn disable() {
 
 /// Stops the clock until an interrupt request is received,
 /// putting the processor into the `WAITING` state.
-#[inline]
+#[inline(always)]
 pub fn wait() {
     // Make sure that all memory accesses above this are done before the wait.
     compiler_fence(Ordering::SeqCst);
@@ -31,7 +31,7 @@ pub fn wait() {
 /// Triggers a software interrupt with the number `V`.
 ///
 /// `V` must be in the range [0; 63].
-#[inline]
+#[inline(always)]
 pub unsafe fn trigger<const V: u8>() {
     const {
         assert!(V < 64, "Interrupt vector must be in the range [0; 63]");

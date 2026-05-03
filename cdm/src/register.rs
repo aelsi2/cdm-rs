@@ -24,7 +24,7 @@ pub mod psr {
     }
 
     /// Reads the register value.
-    #[inline]
+    #[inline(always)]
     pub fn read() -> Psr {
         let value: u16;
         unsafe { asm!("ldps {}", out(reg) value, options(nomem, nostack, preserves_flags)) }
@@ -32,7 +32,7 @@ pub mod psr {
     }
 
     /// Writes `value` to the register.
-    #[inline]
+    #[inline(always)]
     pub unsafe fn write(value: Psr) {
         let val: u16 = value.into();
         compiler_fence(Ordering::SeqCst);
@@ -46,7 +46,7 @@ pub mod pc {
     use core::arch::asm;
 
     /// Reads the register value.
-    #[inline]
+    #[inline(always)]
     pub fn read() -> usize {
         let value: usize;
         unsafe { asm!("ldpc {}", out(reg) value, options(nomem, nostack, preserves_flags)) }
@@ -59,7 +59,7 @@ pub mod sp {
     use core::arch::asm;
 
     /// Reads the register value.
-    #[inline]
+    #[inline(always)]
     pub fn read() -> usize {
         let value: usize;
         unsafe { asm!("ldsp {}", out(reg) value, options(nomem, nostack, preserves_flags)) }
@@ -72,7 +72,7 @@ pub mod fp {
     use core::arch::asm;
 
     /// Reads the register value.
-    #[inline]
+    #[inline(always)]
     pub fn read() -> usize {
         let value: usize;
         unsafe { asm!("move fp, {}", out(reg) value, options(nomem, nostack)) }

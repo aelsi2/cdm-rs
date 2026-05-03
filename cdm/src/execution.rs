@@ -4,7 +4,7 @@ use core::arch::asm;
 use core::sync::atomic::{Ordering, compiler_fence};
 
 /// Stops the clock, putting the processor into the `HALTED` state.
-#[inline]
+#[inline(always)]
 pub fn halt() -> ! {
     // Make sure that all reads/writes complete before halting.
     compiler_fence(Ordering::SeqCst);
@@ -12,7 +12,7 @@ pub fn halt() -> ! {
 }
 
 /// Performs a soft reset, fetching interrupt vector 0.
-#[inline]
+#[inline(always)]
 pub unsafe fn reset() -> ! {
     // Make sure that all reads/writes complete before resetting.
     compiler_fence(Ordering::SeqCst);
