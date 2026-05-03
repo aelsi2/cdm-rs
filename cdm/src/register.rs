@@ -49,18 +49,8 @@ pub mod pc {
     #[inline]
     pub fn read() -> usize {
         let value: usize;
-        unsafe {
-            asm!("ldpc {}", out(reg) value, options(nomem, nostack, preserves_flags));
-        }
+        unsafe { asm!("ldpc {}", out(reg) value, options(nomem, nostack, preserves_flags)) }
         value
-    }
-
-    /// Writes `value` to the register.
-    #[inline]
-    pub unsafe fn write(value: usize) {
-        unsafe {
-            asm!("stpc {}", in(reg) value);
-        }
     }
 }
 
@@ -75,12 +65,6 @@ pub mod sp {
         unsafe { asm!("ldsp {}", out(reg) value, options(nomem, nostack, preserves_flags)) }
         value
     }
-
-    /// Writes `value` to the register.
-    #[inline]
-    pub unsafe fn write(value: usize) {
-        unsafe { asm!("stsp {}", in(reg) value, options(nomem, preserves_flags)) }
-    }
 }
 
 pub mod fp {
@@ -91,13 +75,7 @@ pub mod fp {
     #[inline]
     pub fn read() -> usize {
         let value: usize;
-        unsafe { asm!("move fp, {}", out(reg) value, options(nomem, nostack, preserves_flags)) }
+        unsafe { asm!("move fp, {}", out(reg) value, options(nomem, nostack)) }
         value
-    }
-
-    /// Writes `value` to the register.
-    #[inline]
-    pub unsafe fn write(value: usize) {
-        unsafe { asm!("move {}, fp", in(reg) value, options(nomem, preserves_flags)) }
     }
 }
