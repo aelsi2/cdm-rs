@@ -1,31 +1,24 @@
 //! Functions for working with interrupts.
 
 use core::arch::asm;
-use core::sync::atomic::{Ordering, compiler_fence};
 
 /// Enables all interrupts.
 #[inline(always)]
 pub unsafe fn enable() {
-    // Make sure that all reads/writes before ei stay in the critical section.
-    compiler_fence(Ordering::SeqCst);
-    unsafe { asm!("ei", options(nostack, nomem)) };
+    unsafe { asm!("ei", options(nostack)) };
 }
 
 /// Disables all interrupts.
 #[inline(always)]
 pub fn disable() {
-    unsafe { asm!("di", options(nostack, nomem)) };
-    // Make sure that all reads/writes after di stay in the critical section.
-    compiler_fence(Ordering::SeqCst);
+    unsafe { asm!("di", options(nostack)) };
 }
 
 /// Stops the clock until an interrupt request is received,
 /// putting the processor into the `WAITING` state.
 #[inline(always)]
 pub fn wait() {
-    // Make sure that all memory accesses above this are done before the wait.
-    compiler_fence(Ordering::SeqCst);
-    unsafe { asm!("wait", options(nostack, nomem, preserves_flags)) };
+    unsafe { asm!("wait", options(nostack, preserves_flags)) };
 }
 
 /// Triggers a software interrupt with the number `V`.

@@ -4,7 +4,6 @@ pub mod psr {
     //! Processor status register (PSR).
     use bitmask_enum::bitmask;
     use core::arch::asm;
-    use core::sync::atomic::{Ordering, compiler_fence};
 
     /// Processor status register flags.
     #[bitmask(u16)]
@@ -35,9 +34,7 @@ pub mod psr {
     #[inline(always)]
     pub unsafe fn write(value: Psr) {
         let val: u16 = value.into();
-        compiler_fence(Ordering::SeqCst);
-        unsafe { asm!("stps {}", in(reg) val, options(nomem, nostack)) }
-        compiler_fence(Ordering::SeqCst);
+        unsafe { asm!("stps {}", in(reg) val, options(nostack)) }
     }
 }
 
