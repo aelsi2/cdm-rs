@@ -1,2 +1,2 @@
-createSrcSidebar('[["cdm",["",[],["critical_section.rs","execution.rs","interrupt.rs","lib.rs","panic_halt.rs","register.rs"]]],["cdm_rt",["",[],["lib.rs"]]]]');
-//{"start":19,"fragment_lengths":[108,30]}
+createSrcSidebar('[["cdm",["",[],["critical_section.rs","execution.rs","interrupt.rs","lib.rs","panic_halt.rs","register.rs"]]],["cdm_rt",["",[],["lib.rs"]]],["cdm_uart",["",[],["corefmt.rs","embedded_io.rs","lib.rs","uart.rs"]]]]');
+//{"start":19,"fragment_lengths":[108,30,72]}
