@@ -1,6 +1,6 @@
 [workspace]
 resolver = "3"
-members = ["cdm", "cdm-rt", "cdm-macros"]
+members = ["cdm", "cdm-rt", "cdm-macros", "cdm-uart"]
 
 # Dev builds fail without this
 [profile.dev]

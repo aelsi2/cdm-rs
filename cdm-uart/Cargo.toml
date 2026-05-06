@@ -1,0 +1,14 @@
+[package]
+name = "cdm-uart"
+version = "0.1.0"
+description = "Hardware abstraction for Logisim UART"
+repository = "https://github.com/aelsi2/cdm-rs"
+keywords = ["cdm", "cdm16", "uart"]
+categories = ["embedded", "hardware-support", "no-std"]
+readme = "README.md"
+edition = "2024"
+rust-version = "1.90"
+
+[dependencies]
+embedded-io = "0.7.1"
+embed-doc-image = "0.1.4"

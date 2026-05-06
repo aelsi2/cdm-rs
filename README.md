@@ -6,6 +6,7 @@ This repository contains a set of crates for accessing the hardware features of 
 - `cdm` - register access, optional implementation of [critical-section](https://crates.io/crates/critical-section), optional panic handler
 - `cdm-rt` - startup code, default exception handlers, interrupt handler definition utilities
 - `cdm-macros` - procedural macros for defining the entry point of the program, interrupt and exception handlers, re-exported in `cdm-rt`
+- `cdm-uart` - hardware abstraction for the [Logisim UART component](https://github.com/cdm-processors/logisim-uart)
 
 These crates are made to be used with the experimental [Rust compiler](https://github.com/ylab-nsu/cdm16-rust) for the [CDM-16 educational processor](https://github.com/cdm-processors/) based on the [CDM-16 LLVM fork](https://github.com/ylab-nsu/cdm16-llvm-neo/).
 
