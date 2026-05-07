@@ -27,7 +27,7 @@ impl Uart {
     /// `data` should point to a 8-bit-wide read-write MMIO register.
     /// Writing to this register should add a byte to the end of the write queue.
     /// Reading from this register should get and remove a byte from the start of read queue.
-    pub unsafe fn new(flags: *const u8, data: *mut u8) -> Self {
+    pub const unsafe fn new(flags: *const u8, data: *mut u8) -> Self {
         Self { flags, data }
     }
 
