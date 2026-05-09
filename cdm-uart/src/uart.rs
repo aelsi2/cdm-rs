@@ -9,6 +9,7 @@ pub struct Uart {
 }
 
 /// Logisim UART error
+#[non_exhaustive]
 #[derive(Debug)]
 pub enum UartError {
     /// The UART component is not connected to a client.
