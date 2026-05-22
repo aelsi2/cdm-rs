@@ -1,5 +1,7 @@
 //! Procedural macros for the `cdm-rt` crate.
 
+#![doc(html_logo_url = "https://aelsi2.github.io/cdm-rs/logo.png")]
+
 use proc_macro::TokenStream;
 use proc_macro2::Span;
 use quote::quote;

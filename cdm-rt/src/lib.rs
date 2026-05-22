@@ -66,6 +66,7 @@
 #![no_std]
 #![feature(asm_experimental_arch)]
 #![feature(doc_auto_cfg)]
+#![doc(html_logo_url = "https://aelsi2.github.io/cdm-rs/logo.png")]
 
 pub use cdm_macros::entry;
 

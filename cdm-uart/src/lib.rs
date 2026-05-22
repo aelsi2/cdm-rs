@@ -54,6 +54,7 @@
 
 #![no_std]
 #![feature(asm_experimental_arch)]
+#![doc(html_logo_url = "https://aelsi2.github.io/cdm-rs/logo.png")]
 
 mod corefmt;
 mod embedded_io;
