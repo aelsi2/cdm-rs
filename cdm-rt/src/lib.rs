@@ -13,28 +13,22 @@
 //! # Cargo features
 //! #### `interrupts`
 //! This feature disables the default interrupt handlers and allows the use of [`interrupt_vectors`](macro@interrupt_vectors)
+//! 
+//! #### `harvard`
+//! This feature enables generation of images for the [Harvard architecture](https://en.wikipedia.org/wiki/Harvard_architecture) with separate program and data address spaces.
+//! By default, the [von Neumann architecture](https://en.wikipedia.org/wiki/Von_Neumann_architecture) with one address space is used.
 //!
 //! # Requirements
-//! #### `memory.x`
-//! The crate expects a file named `memory.x` to be present in the project root directory.
-//! This file is a linker script that needs to specify the address range that the linker can use.
-//! This is done using the `MEMORY` command defining a region named `RAM`. The origin
-//! address must be greater than or equal to `0x100` so that it doesn't intersect with the IVT.
-//!
-//! You can reserve a range of addresses between the IVT and the main memory for MMIO by specifying a
-//! larger origin address for `RAM` (e.g `0x120`).
-//! ***
-//!
 //! #### Rust flags
 //! The crate generates a linker script named `link.x` in the output directory. It needs to be passed to the
 //! linker. This can be done by passing `-Clink-arg=-Tlink.x` to rustc.
-//! ***
 //!
 //! #### Entry point
 //! Exactly one function needs to be marked as the application entry point by applying the [`entry`](macro@entry) attribute.
+//! ***
 //!
-//! # Example
-//! `.cargo/config.toml`
+//! #### Example
+//! ##### `.cargo/config.toml`
 //! ```toml
 //! [build]
 //! target = "cdm-none"
@@ -43,14 +37,7 @@
 //! build-std = [ "core" ]
 //! ```
 //!
-//! `memory.x`
-//! ```ld
-//! MEMORY {
-//!     RAM : ORIGIN = 0x100, LENGTH = 64K-0x100
-//! }
-//! ```
-//!
-//! `src/main.rs`
+//! ##### `src/main.rs`
 //! ```rust
 //! #![no_std]
 //! #![no_main]
@@ -60,6 +47,55 @@
 //! #[entry]
 //! fn main() -> ! {
 //!     loop { /* .. */ }
+//! }
+//! ```
+//!
+//! ## Memory mapped I/O
+//! If you want to use memory mapped I/O, you will need to:
+//! - create a linker script (e.g. `memory.x` in the project root)
+//! - set the value of `RAM_ORIGIN` and/or `RAM_LENGTH` in the linker script to reserve a range of addresses for the MMIO registers
+//! - create one or more symbols for the registers and set their values in the linker script
+//! - pass the script to the linker (e.g. pass `-Clink-arg=-Tmemory.x` to rustc)
+//! - declare the symbols in Rust inside an `extern "C"` block
+//! - use [`core::ptr::read_volatile`](https://doc.rust-lang.org/core/ptr/fn.read_volatile.html) and/or 
+//! [`core::ptr::write_volatile`](https://doc.rust-lang.org/core/ptr/fn.write_volatile.html) to read from and write
+//! to the registers
+//!
+//! **Important note:** when using the von Neumann architecture, `RAM_ORIGIN` and MMIO register
+//! addresses need to be greater or equal to `0x100` (256 in decimal) to avoid overlapping with the IVT.
+//! ***
+//!
+//! #### Example
+//! ##### `.cargo/config.toml`
+//! ```toml
+//! [build]
+//! target = "cdm-none"
+//! rustflags = [ "-Clink-arg=-Tlink.x", "-Clink-arg=-Tmemory.x" ]
+//! [unstable]
+//! build-std = [ "core" ]
+//! ```
+//!
+//! ##### `memory.x`
+//! ```ld
+//! RAM_ORIGIN = 0x120;
+//!
+//! MMIO_IN = 0x100;
+//! MMIO_OUT = 0x102;
+//! ```
+//!
+//! ##### `src/mmio.rs`
+//! ```rust
+//! unsafe extern "C" {
+//!     static MMIO_IN: u16;
+//!     static mut MMIO_OUT: u16;
+//! }
+//!
+//! pub fn get_in() -> u16 {
+//!     unsafe { core::ptr::read_volatile(&raw MMIO_IN) }
+//! }
+//! 
+//! pub fn set_out(value: u16) {
+//!     unsafe { core::ptr::write_volatile(&raw mut MMIO_OUT, value) }
 //! }
 //! ```
 
@@ -161,24 +197,65 @@ macro_rules! interrupt_vectors {
 #[repr(C)]
 struct ExceptionVector(pub unsafe extern "C" fn() -> !, pub Psr);
 
-// The initialization code
+// Initialization code
+#[cfg(not(feature = "harvard"))]
 core::arch::global_asm!(
     ".section .text._start",
     ".global _start",
     ".type _start,%function",
     "_start:",
-    "ldi fp, 0",
+    "ldi fp, __stack_start",
     "stsp fp",
     "jsr main",
     "halt",
 );
 
-// The default interrupt and exception handler
+#[cfg(feature = "harvard")]
+core::arch::global_asm!(
+    ".section .text._start",
+    ".global _start",
+    ".type _start,%function",
+    "_start:",
+    "ldi fp, __stack_start",
+    "stsp fp",
+    "ldi r0, __data_rom",
+    "ldi r1, __data",
+    "ldi r2, __data_length",
+    "cmp r2, 0",
+    "br 1f",
+    "0:",
+    "lcw r0, r3",
+    "stw r1, r3",
+    "add r0, 2",
+    "add r1, 2",
+    "add r2, -2",
+    "1:",
+    "bnz 0b",
+    "ldi r0, __bss",
+    "ldi r1, __bss_length",
+    "ldi r2, 0",
+    "cmp r1, 0",
+    "br 1f",
+    "0:",
+    "stw r0, r2",
+    "add r0, 2",
+    "add r1, -2",
+    "1:",
+    "bnz 0b",
+    "jsr main",
+    "halt",
+);
+
+// Default interrupt and exception handler
 core::arch::global_asm!(
     ".section .text._DefaultHandler",
     ".global _DefaultHandler",
     ".type _DefaultHandler,%function",
     "_DefaultHandler:",
+    "ldi r0, 0xDED0",
+    "ldps r1",
+    "or r0, r1, r0",
+    "pop r1",
     "halt",
 );
 
@@ -191,7 +268,7 @@ unsafe extern "C" {
     fn DoubleFault() -> !;
 }
 
-// The reset vector
+// Reset vector
 #[used]
 #[unsafe(no_mangle)]
 #[unsafe(link_section = ".ivt.reset_vector")]
@@ -202,10 +279,10 @@ static __RESET_VECTOR: ExceptionVector = ExceptionVector(Reset, Psr::None);
 #[unsafe(no_mangle)]
 #[unsafe(link_section = ".ivt.exceptions")]
 static __EXCEPTIONS: [ExceptionVector; EXCEPTION_COUNT] = [
-    ExceptionVector(UnalignedSP, Psr::None),
-    ExceptionVector(UnalignedPC, Psr::None),
-    ExceptionVector(InvalidInst, Psr::None),
-    ExceptionVector(DoubleFault, Psr::None),
+    ExceptionVector(UnalignedSP, Psr::ArithNegative), // psr = 1
+    ExceptionVector(UnalignedPC, Psr::ArithZero),     // psr = 2
+    ExceptionVector(InvalidInst, Psr::ArithNegative.or(Psr::ArithZero)), // psr = 3
+    ExceptionVector(DoubleFault, Psr::ArithOverflow), // psr = 4
 ];
 
 // Application-specific interrupt vectors

@@ -16,3 +16,4 @@ cdm-macros = { version = "0.1.0", path = "../cdm-macros" }
 
 [features]
 interrupts = []
+harvard = []

@@ -48,8 +48,8 @@
 //! ```
 //! Linker script:
 //! ```ld
-//! UART_FLAGS = /* flags register address */
-//! UART_RX_TX = /* rx/tx register address */
+//! UART_FLAGS = /* flags register address */;
+//! UART_RX_TX = /* rx/tx register address */;
 //! ```
 
 #![no_std]

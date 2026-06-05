@@ -1,0 +1,64 @@
+EXTERN(_DefaultHandler);
+
+PROVIDE(ExceptionHandler = _DefaultHandler);
+PROVIDE(InterruptHandler = _DefaultHandler);
+
+PROVIDE(UnalignedSP = ExceptionHandler);
+PROVIDE(UnalignedPC = ExceptionHandler);
+PROVIDE(InvalidInst = ExceptionHandler);
+PROVIDE(DoubleFault = ExceptionHandler);
+
+MEMORY {
+    PROGMEM : ORIGIN = 0x0, LENGTH = 64K
+    RAM : ORIGIN = 0x80000 + RAM_ORIGIN, LENGTH = RAM_LENGTH
+}
+
+PROVIDE(RAM_ORIGIN = 0x0);
+PROVIDE(RAM_LENGTH = 64K-RAM_ORIGIN);
+
+SECTIONS
+{
+  .ivt 0x00 : {             /* Interrupt vector table */
+    __vector_table = .;
+    KEEP(*(.ivt.reset_vector));
+    __vector_table_ex = .;
+    KEEP(*(.ivt.exceptions));
+    __vector_table_int = .;
+    KEEP(*(.ivt.interrupts));
+    __vector_table_end = .;
+  } > PROGMEM AT> PROGMEM
+
+  .text : ALIGN(2) {
+    *(.text._start);        /* Reset/startup code */
+    *(.text*);              /* Program code */
+  } > PROGMEM AT> PROGMEM
+
+  .progmem : ALIGN(2) {
+    *(.progmem*);           /* Program memory constants */
+  } > PROGMEM AT> PROGMEM
+
+  .data : ALIGN(2) {
+    __data = .;
+    *(.rodata*);            /* Read-only data */
+    *(.data*);              /* Initialized variables */
+    . = ALIGN(2);
+  } > RAM AT> PROGMEM
+
+  .bss : ALIGN(2) {
+    __bss = .;
+    *(.bss*);               /* Uninitialized variables */
+    *(COMMON);
+    . = ALIGN(2);
+  } > RAM
+
+  __data_rom = LOADADDR(.data);
+  __data_length = SIZEOF(.data);
+  __bss_length = SIZEOF(.bss);
+  __stack_start = (ORIGIN(RAM) + LENGTH(RAM)) & 0xFFFF;
+}
+
+ASSERT(ORIGIN(RAM) % 2 == 0, "ERROR(cdm-rt): RAM origin must be a multiple of 2");
+ASSERT(ORIGIN(RAM) % 2 != 0 || LENGTH(RAM) % 2 == 0, "ERROR(cdm-rt): RAM length must be a multiple of 2");
+ASSERT(__vector_table_ex == __vector_table + 0x4, "BUG(cdm-rt): reset vector is missing");
+ASSERT(__vector_table_int == __vector_table_ex + 0x10, "BUG(cdm-rt): exception vectors are missing");
+ASSERT(__vector_table_end == __vector_table_int + 0xEC, "ERROR(cdm-rt): no interrupt vectors were provided; use interrupt_vectors![...]");
