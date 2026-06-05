@@ -28,6 +28,9 @@ features = [
     # Optional: disables default interrupt handlers and allows definition 
     # of custom interrupt handlers with interrupt_vectors![...]
     # "interrupts",
+    # Optional: enables Harvard architecture mode with separate program and data address spaces;
+    # default is von Neumann (one address space) mode
+    # "harvard",
 ]
 ```
 
@@ -39,13 +42,6 @@ rustflags = [ "-Clink-arg=-Tlink.x" ]
 
 [unstable]
 build-std = [ "core" ]
-```
-
-Create a `memory.x` file in your project root with the following contents:
-```ld
-MEMORY {
-    RAM : ORIGIN = 0x100, LENGTH = 64K-0x100
-}
 ```
 
 Mark your `main` function with the `cdm_rt::entry` attribute:
