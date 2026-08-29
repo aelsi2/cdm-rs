@@ -136,7 +136,7 @@ impl InterruptVector {
         unsafe extern "cdm-isr" {
             fn _interrupt_handler();
         }
-        InterruptVector(_interrupt_handler, Psr::None)
+        InterruptVector(_interrupt_handler, Psr::NONE)
     };
 }
 
@@ -151,9 +151,9 @@ impl InterruptVector {
 ///
 /// ``` no_run
 /// interrupt_vectors![
-///     InterruptVector(MyHandler1, Psr::None), // int EXCEPTION_COUNT+0
-///     InterruptVector(MyHandler2, Psr::None), // int EXCEPTION_COUNT+1
-///     InterruptVector(MyHandler3, Psr::None), // int EXCEPTION_COUNT+2
+///     InterruptVector(MyHandler1, Psr::NONE), // int EXCEPTION_COUNT+0
+///     InterruptVector(MyHandler2, Psr::NONE), // int EXCEPTION_COUNT+1
+///     InterruptVector(MyHandler3, Psr::NONE), // int EXCEPTION_COUNT+2
 /// ];
 ///
 /// #[cdm_rt::interrupt]
@@ -299,7 +299,7 @@ unsafe extern "C" {
 #[unsafe(no_mangle)]
 #[unsafe(link_section = ".ivt.exceptions")]
 static __EXCEPTIONS: [ExceptionVector; EXCEPTION_COUNT] = [
-    ExceptionVector(reset, Psr::None),
+    ExceptionVector(reset, Psr::from_bits(0x0)),
     ExceptionVector(unaligned_sp, Psr::from_bits(0x1)),
     ExceptionVector(unaligned_pc, Psr::from_bits(0x2)),
     ExceptionVector(invalid_inst, Psr::from_bits(0x3)),

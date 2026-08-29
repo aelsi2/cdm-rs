@@ -272,7 +272,7 @@ pub fn exception(args: TokenStream, input: TokenStream) -> TokenStream {
 ///
 /// ``` no_run
 /// cdm_rt::interrupt_vectors![
-///     cdm_rt::InterruptVector(on_input, cdm_rt::Psr::None)
+///     cdm_rt::InterruptVector(on_input, cdm_rt::Psr::NONE)
 /// ];
 ///
 /// #[cdm_rt::interrupt]
