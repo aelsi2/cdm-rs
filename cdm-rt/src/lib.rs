@@ -13,7 +13,7 @@
 //! # Cargo features
 //! #### `interrupts`
 //! This feature disables the default interrupt handlers and allows the use of [`interrupt_vectors`](macro@interrupt_vectors)
-//! 
+//!
 //! #### `harvard`
 //! This feature enables generation of images for the [Harvard architecture](https://en.wikipedia.org/wiki/Harvard_architecture) with separate program and data address spaces.
 //! By default, the [von Neumann architecture](https://en.wikipedia.org/wiki/Von_Neumann_architecture) with one address space is used.
@@ -57,7 +57,7 @@
 //! - create one or more symbols for the registers and set their values in the linker script
 //! - pass the script to the linker (e.g. pass `-Clink-arg=-Tmemory.x` to rustc)
 //! - declare the symbols in Rust inside an `extern "C"` block
-//! - use [`core::ptr::read_volatile`](https://doc.rust-lang.org/core/ptr/fn.read_volatile.html) and/or 
+//! - use [`core::ptr::read_volatile`](https://doc.rust-lang.org/core/ptr/fn.read_volatile.html) and/or
 //! [`core::ptr::write_volatile`](https://doc.rust-lang.org/core/ptr/fn.write_volatile.html) to read from and write
 //! to the registers
 //!
@@ -93,7 +93,7 @@
 //! pub fn get_in() -> u16 {
 //!     unsafe { core::ptr::read_volatile(&raw MMIO_IN) }
 //! }
-//! 
+//!
 //! pub fn set_out(value: u16) {
 //!     unsafe { core::ptr::write_volatile(&raw mut MMIO_OUT, value) }
 //! }
@@ -112,14 +112,11 @@ pub use cdm_macros::interrupt;
 
 pub use cdm::register::psr::Psr;
 
-/// The number of exception vectors in the interrupt vector table.
-pub const EXCEPTION_COUNT: usize = 4;
-
-/// The index of the first application-specific interrupt vector.
-pub const INTERRUPT_START: usize = EXCEPTION_COUNT + 1;
+/// The number of exception vectors in the interrupt vector table, including the start vector.
+pub const EXCEPTION_COUNT: usize = 16;
 
 /// The number of application-specific interrupt vectors in the interrupt vector table.
-pub const INTERRUPT_COUNT: usize = 59;
+pub const INTERRUPT_COUNT: usize = 64 - EXCEPTION_COUNT;
 
 /// Represents a vector in the interrupt vector table.
 ///
@@ -134,20 +131,19 @@ pub struct InterruptVector(pub unsafe extern "cdm-isr" fn(), pub Psr);
 impl InterruptVector {
     /// The default vector used in absence of an explicit definition.
     ///
-    /// Calls `InterruptHandler`, which triggers a hardware halt by default.
+    /// Calls `_interrupt_handler`, which triggers a hardware halt by default.
     pub const DEFAULT: Self = {
         unsafe extern "cdm-isr" {
-            fn InterruptHandler();
+            fn _interrupt_handler();
         }
-        InterruptVector(InterruptHandler, Psr::None)
+        InterruptVector(_interrupt_handler, Psr::None)
     };
 }
 
 /// Defines the application-specific interrupt handler section of the interrupt vector table.
 ///
-/// The interrupt vectors specified in the arguments are placed sequentially after the reset and
-/// exception vectors, starting from index `INTERRUPT_START`. The rest of the table is filled
-/// with `InterruptVector::DEFAULT`.
+/// The interrupt vectors specified in the arguments are placed sequentially after exception vectors,
+/// starting from index `EXCEPTION_COUNT`. The rest of the table is filled with `InterruptVector::DEFAULT`.
 ///
 /// Must be used **once** in the dependency graph.
 ///
@@ -155,9 +151,9 @@ impl InterruptVector {
 ///
 /// ``` no_run
 /// interrupt_vectors![
-///     InterruptVector(MyHandler1, Psr::None), // int INTERRUPT_START+0
-///     InterruptVector(MyHandler2, Psr::None), // int INTERRUPT_START+1
-///     InterruptVector(MyHandler3, Psr::None), // int INTERRUPT_START+2
+///     InterruptVector(MyHandler1, Psr::None), // int EXCEPTION_COUNT+0
+///     InterruptVector(MyHandler2, Psr::None), // int EXCEPTION_COUNT+1
+///     InterruptVector(MyHandler3, Psr::None), // int EXCEPTION_COUNT+2
 /// ];
 ///
 /// #[cdm_rt::interrupt]
@@ -206,7 +202,9 @@ core::arch::global_asm!(
     "_start:",
     "ldi fp, __stack_start",
     "stsp fp",
+    "addsp -8",
     "jsr main",
+    "addsp 8",
     "halt",
 );
 
@@ -242,16 +240,18 @@ core::arch::global_asm!(
     "add r1, -2",
     "1:",
     "bnz 0b",
+    "addsp -8",
     "jsr main",
+    "addsp 8",
     "halt",
 );
 
 // Default interrupt and exception handler
 core::arch::global_asm!(
-    ".section .text._DefaultHandler",
-    ".global _DefaultHandler",
-    ".type _DefaultHandler,%function",
-    "_DefaultHandler:",
+    ".section .text._default_handler",
+    ".global _default_handler",
+    ".type _default_handler,%function",
+    "_default_handler:",
     "ldi r0, 0xDED0",
     "ldps r1",
     "or r0, r1, r0",
@@ -261,28 +261,60 @@ core::arch::global_asm!(
 
 unsafe extern "C" {
     #[link_name = "_start"]
-    fn Reset() -> !;
-    fn UnalignedSP() -> !;
-    fn UnalignedPC() -> !;
-    fn InvalidInst() -> !;
-    fn DoubleFault() -> !;
+    fn reset() -> !;
+    #[link_name = "_ex_unaligned_sp"]
+    fn unaligned_sp() -> !;
+    #[link_name = "_ex_unaligned_pc"]
+    fn unaligned_pc() -> !;
+    #[link_name = "_ex_invalid_inst"]
+    fn invalid_inst() -> !;
+    #[link_name = "_ex_double_fault"]
+    fn double_fault() -> !;
+    #[link_name = "_ex_priv_violation"]
+    fn priv_violation() -> !;
+    #[link_name = "_ex_reserved_6"]
+    fn ex_reserved_6() -> !;
+    #[link_name = "_ex_system_call"]
+    fn system_call() -> !;
+    #[link_name = "_ex_reserved_8"]
+    fn ex_reserved_8() -> !;
+    #[link_name = "_ex_reserved_9"]
+    fn ex_reserved_9() -> !;
+    #[link_name = "_ex_reserved_a"]
+    fn ex_reserved_a() -> !;
+    #[link_name = "_ex_reserved_b"]
+    fn ex_reserved_b() -> !;
+    #[link_name = "_ex_reserved_c"]
+    fn ex_reserved_c() -> !;
+    #[link_name = "_ex_reserved_d"]
+    fn ex_reserved_d() -> !;
+    #[link_name = "_ex_reserved_e"]
+    fn ex_reserved_e() -> !;
+    #[link_name = "_ex_reserved_f"]
+    fn ex_reserved_f() -> !;
 }
-
-// Reset vector
-#[used]
-#[unsafe(no_mangle)]
-#[unsafe(link_section = ".ivt.reset_vector")]
-static __RESET_VECTOR: ExceptionVector = ExceptionVector(Reset, Psr::None);
 
 // Harware-defined exception vectors
 #[used]
 #[unsafe(no_mangle)]
 #[unsafe(link_section = ".ivt.exceptions")]
 static __EXCEPTIONS: [ExceptionVector; EXCEPTION_COUNT] = [
-    ExceptionVector(UnalignedSP, Psr::ArithNegative), // psr = 1
-    ExceptionVector(UnalignedPC, Psr::ArithZero),     // psr = 2
-    ExceptionVector(InvalidInst, Psr::ArithNegative.or(Psr::ArithZero)), // psr = 3
-    ExceptionVector(DoubleFault, Psr::ArithOverflow), // psr = 4
+    ExceptionVector(reset, Psr::None),
+    ExceptionVector(unaligned_sp, Psr::from_bits(0x1)),
+    ExceptionVector(unaligned_pc, Psr::from_bits(0x2)),
+    ExceptionVector(invalid_inst, Psr::from_bits(0x3)),
+    ExceptionVector(double_fault, Psr::from_bits(0x4)),
+    ExceptionVector(priv_violation, Psr::from_bits(0x5)),
+    ExceptionVector(ex_reserved_6, Psr::from_bits(0x6)),
+    ExceptionVector(system_call, Psr::from_bits(0x7)),
+    ExceptionVector(ex_reserved_8, Psr::from_bits(0x8)),
+    ExceptionVector(ex_reserved_9, Psr::from_bits(0x9)),
+    ExceptionVector(ex_reserved_a, Psr::from_bits(0xA)),
+    ExceptionVector(ex_reserved_b, Psr::from_bits(0xB)),
+    ExceptionVector(ex_reserved_c, Psr::from_bits(0xC)),
+    ExceptionVector(ex_reserved_d, Psr::from_bits(0xD)),
+    ExceptionVector(ex_reserved_e, Psr::from_bits(0xE)),
+    ExceptionVector(ex_reserved_f, Psr::from_bits(0xF)),
 ];
 
 // Application-specific interrupt vectors

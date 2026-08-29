@@ -6,7 +6,7 @@ use proc_macro::TokenStream;
 use proc_macro2::Span;
 use quote::quote;
 use syn::{
-    Ident, ItemFn, ReturnType, Type,
+    Ident, ItemFn, LitInt, ReturnType, Type,
     parse::{self, Parse},
     parse_macro_input,
     spanned::Spanned,
@@ -19,16 +19,38 @@ enum ExceptionKind {
     UnalignedPC,
     InvalidInst,
     DoubleFault,
+    PrivViolation,
+    Reserved6,
+    SystemCall,
+    Reserved8,
+    Reserved9,
+    ReservedA,
+    ReservedB,
+    ReservedC,
+    ReservedD,
+    ReservedE,
+    ReservedF,
 }
 
 impl ExceptionKind {
     fn export_name(&self) -> &'static str {
         match self {
-            ExceptionKind::Default => "ExceptionHandler",
-            ExceptionKind::UnalignedSP => "UnalignedSP",
-            ExceptionKind::UnalignedPC => "UnalignedPC",
-            ExceptionKind::InvalidInst => "InvalidInst",
-            ExceptionKind::DoubleFault => "DoubleFault",
+            ExceptionKind::Default => "_exception_handler",
+            ExceptionKind::UnalignedSP => "_ex_unaligned_sp",
+            ExceptionKind::UnalignedPC => "_ex_unaligned_pc",
+            ExceptionKind::InvalidInst => "_ex_invalid_inst",
+            ExceptionKind::DoubleFault => "_ex_double_fault",
+            ExceptionKind::PrivViolation => "_ex_priv_violation",
+            ExceptionKind::Reserved6 => "_ex_reserved_6",
+            ExceptionKind::SystemCall => "_ex_system_call",
+            ExceptionKind::Reserved8 => "_ex_reserved_8",
+            ExceptionKind::Reserved9 => "_ex_reserved_9",
+            ExceptionKind::ReservedA => "_ex_reserved_a",
+            ExceptionKind::ReservedB => "_ex_reserved_b",
+            ExceptionKind::ReservedC => "_ex_reserved_c",
+            ExceptionKind::ReservedD => "_ex_reserved_d",
+            ExceptionKind::ReservedE => "_ex_reserved_e",
+            ExceptionKind::ReservedF => "_ex_reserved_f",
         }
     }
 }
@@ -41,24 +63,53 @@ impl Default for ExceptionKind {
 
 impl Parse for ExceptionKind {
     fn parse(input: parse::ParseStream) -> syn::Result<Self> {
+        const MISSING_KIND: &str = "`#[exception(...)]` requires an exception kind";
+        const INVALID_KIND: &str = "Exception kind must be a number between 1 and 15 or one of: `Default`, `UnalignedSP`, `UnalignedPC`, `InvalidInst`, `DoubleFault`, `PrivViolation`, `SystemCall`";
+        const RESET_FORBIDDEN: &str = "Setting the reset vector is not allowed";
+
         if input.is_empty() {
-            return Err(syn::Error::new(
-                Span::call_site(),
-                "`#[exception(...)]` requires an exception kind",
-            ));
+            return Err(syn::Error::new(Span::call_site(), MISSING_KIND));
         }
-        let ident = input.parse::<Ident>()?;
-        let kind = match ident.to_string().as_str() {
-            "Default" => Self::Default,
-            "UnalignedSP" => Self::UnalignedSP,
-            "UnalignedPC" => Self::UnalignedPC,
-            "InvalidInst" => Self::InvalidInst,
-            "DoubleFault" => Self::DoubleFault,
-            _ => {
-                return Err(syn::Error::new_spanned(
-                    ident,
-                    "Exception kind must be one of: `Default`, `UnalignedSP`, `UnalignedPC`, `InvalidInst`, `DoubleFault`",
-                ));
+
+        let kind = if input.lookahead1().peek(LitInt) {
+            let literal = input.parse::<LitInt>()?;
+            let value: u8 = literal.base10_parse()?;
+            match value {
+                0 => {
+                    return Err(syn::Error::new(Span::call_site(), RESET_FORBIDDEN));
+                }
+                1 => Self::UnalignedSP,
+                2 => Self::UnalignedPC,
+                3 => Self::InvalidInst,
+                4 => Self::DoubleFault,
+                5 => Self::PrivViolation,
+                6 => Self::Reserved6,
+                7 => Self::SystemCall,
+                8 => Self::Reserved8,
+                9 => Self::Reserved9,
+                10 => Self::ReservedA,
+                11 => Self::ReservedB,
+                12 => Self::ReservedC,
+                13 => Self::ReservedD,
+                14 => Self::ReservedE,
+                15 => Self::ReservedF,
+                _ => {
+                    return Err(syn::Error::new_spanned(literal, INVALID_KIND));
+                }
+            }
+        } else {
+            let ident = input.parse::<Ident>()?;
+            match ident.to_string().as_str() {
+                "Default" => Self::Default,
+                "UnalignedSP" => Self::UnalignedSP,
+                "UnalignedPC" => Self::UnalignedPC,
+                "InvalidInst" => Self::InvalidInst,
+                "DoubleFault" => Self::DoubleFault,
+                "PrivViolation" => Self::PrivViolation,
+                "SystemCall" => Self::SystemCall,
+                _ => {
+                    return Err(syn::Error::new_spanned(ident, INVALID_KIND));
+                }
             }
         };
 
@@ -128,8 +179,8 @@ pub fn entry(args: TokenStream, input: TokenStream) -> TokenStream {
     .into()
 }
 
-/// Defines an exception handler. 
-/// 
+/// Defines an exception handler.
+///
 /// One of the following exception kinds must be specified as a paramter to the attribute:
 /// - `Default` - default exception handler used for all exceptions when not overriden by a
 /// specific handler
@@ -137,10 +188,14 @@ pub fn entry(args: TokenStream, input: TokenStream) -> TokenStream {
 /// - `UnalignedPC` - unaligned program counter
 /// - `InvalidInst` - invalid instruction
 /// - `DoubleFault` - double fault
+/// - `PrivViolation` - privilege violation (CdM-16e only)
+/// - `SystemCall` - system call (CdM-16e only)
+///
+/// Alternatively, a integer literal IVT index in the range [1; 15] can be used.
 ///
 /// The function must have the following signature: `[unsafe] fn() -> !`.
 /// It will be called when the specified exception occurs.
-/// 
+///
 /// Each exception handler must be defined at most **once** in the dependency graph.
 ///
 /// ``` no_run
@@ -153,6 +208,13 @@ pub fn entry(args: TokenStream, input: TokenStream) -> TokenStream {
 ///
 /// #[cdm_rt::exception(InvalidInst)]
 /// fn on_invalid_inst() -> ! {
+///     loop {
+///         /* .. */
+///     }
+/// }
+///
+/// #[cdm_rt::exception(7)]
+/// fn on_system_call() -> ! {
 ///     loop {
 ///         /* .. */
 ///     }
@@ -244,9 +306,12 @@ pub fn interrupt(args: TokenStream, input: TokenStream) -> TokenStream {
     }
 
     if !args.is_empty() {
-        return parse::Error::new(Span::call_site(), "`#[interrupt]` attribute accepts no arguments")
-            .to_compile_error()
-            .into();
+        return parse::Error::new(
+            Span::call_site(),
+            "`#[interrupt]` attribute accepts no arguments",
+        )
+        .to_compile_error()
+        .into();
     }
 
     let attrs = f.attrs;

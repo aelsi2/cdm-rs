@@ -1,4 +1,4 @@
-//! Functions for accessing processor registers.
+//! Processor register types and functions.
 
 pub mod psr {
     //! Processor status register (PSR).
@@ -20,6 +20,13 @@ pub mod psr {
         ArithCarry = 0x8,
         /// Interrupt enable flag.
         Interrupt = 0x8000,
+    }
+
+    impl Psr {
+        /// Creates a processor status value from the corresponding bit representation.
+        pub const fn from_bits(bits: u16) -> Self {
+            Self { bits }
+        }
     }
 
     /// Reads the register value.
