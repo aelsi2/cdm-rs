@@ -47,44 +47,66 @@ pub mod psr {
 
 pub mod pc {
     //! Program counter (PC).
-    use core::arch::asm;
+
+    #[doc(hidden)]
+    #[macro_export]
+    macro_rules! internal_pc_read {
+        () => {
+            {
+                let value: usize;
+                unsafe { ::core::arch::asm!("ldpc {}", out(reg) value, options(nomem, nostack, preserves_flags)) }
+                value
+            }
+        };
+    }
 
     /// Reads the register value.
-    #[inline(always)]
-    pub fn read() -> usize {
-        let value: usize;
-        unsafe { asm!("ldpc {}", out(reg) value, options(nomem, nostack, preserves_flags)) }
-        value
-    }
+    #[doc(inline)]
+    pub use crate::internal_pc_read as read;
 }
 
 pub mod sp {
     //! Stack pointer (SP).
-    use core::arch::asm;
+
+    #[doc(hidden)]
+    #[macro_export]
+    macro_rules! internal_sp_read {
+        () => {
+            {
+                let value: usize;
+                unsafe { ::core::arch::asm!("ldsp {}", out(reg) value, options(nomem, nostack, preserves_flags)) }
+                value
+            }
+        };
+    }
 
     /// Reads the register value.
-    #[inline(always)]
-    pub fn read() -> usize {
-        let value: usize;
-        unsafe { asm!("ldsp {}", out(reg) value, options(nomem, nostack, preserves_flags)) }
-        value
-    }
+    #[doc(inline)]
+    pub use crate::internal_sp_read as read;
 }
 
 pub mod fp {
     //! Frame pointer (FP).
-    use core::arch::asm;
+
+    #[doc(hidden)]
+    #[macro_export]
+    macro_rules! internal_fp_read {
+        () => {
+            {
+                let value: usize;
+                unsafe { ::core::arch::asm!("move fp, {}", out(reg) value, options(nomem, nostack)) }
+                value
+            }
+        };
+    }
 
     /// Reads the register value.
-    #[inline(always)]
-    pub fn read() -> usize {
-        let value: usize;
-        unsafe { asm!("move fp, {}", out(reg) value, options(nomem, nostack)) }
-        value
-    }
+    #[doc(inline)]
+    pub use crate::internal_fp_read as read;
 }
 
-#[cfg(target_feature = "e")]
+#[doc(cfg(target_feature = "e"))]
+#[cfg(any(target_feature = "e", doc))]
 pub mod ssp {
     //! Shadow stack pointer (SSP).
     use core::arch::asm;
