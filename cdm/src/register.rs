@@ -18,6 +18,18 @@ pub mod psr {
         ArithOverflow = 0x4,
         /// Arithmetic carry flag.
         ArithCarry = 0x8,
+        /// Bit mask for the MMU context number.
+        #[doc(cfg(target_feature = "e"))]
+        #[cfg(any(target_feature = "e", doc))]
+        MmuContext = 0xFF0,
+        /// I/O mapping enable flag.
+        #[doc(cfg(target_feature = "e"))]
+        #[cfg(any(target_feature = "e", doc))]
+        IoEnable = 0x2000,
+        /// Processor mode flag (system = 0, user = 1).
+        #[doc(cfg(target_feature = "e"))]
+        #[cfg(any(target_feature = "e", doc))]
+        Mode = 0x4000,
         /// Interrupt enable flag.
         Interrupt = 0x8000,
     }
@@ -26,6 +38,23 @@ pub mod psr {
         /// Creates a processor status value from the corresponding bit representation.
         pub const fn from_bits(bits: u16) -> Self {
             Self { bits }
+        }
+
+        /// Creates a processor status value from a MMU context number.
+        #[doc(cfg(target_feature = "e"))]
+        #[cfg(any(target_feature = "e", doc))]
+        pub const fn from_context_number(context_number: u8) -> Self {
+            Self {
+                bits: (context_number as u16) << 4,
+            }
+        }
+
+        /// Extracts the MMU context number from this processor status value.
+        #[doc(cfg(target_feature = "e"))]
+        #[cfg(any(target_feature = "e", doc))]
+        #[inline(always)]
+        pub const fn context_number(self) -> u8 {
+            (self.and(Self::MmuContext).bits() >> 4) as u8
         }
     }
 
