@@ -136,7 +136,7 @@
 <a href=#136 id=136 data-nosnippet>136</a>        <span class="kw">unsafe extern </span><span class="string">"cdm-isr" </span>{
 <a href=#137 id=137 data-nosnippet>137</a>            <span class="kw">fn </span>_interrupt_handler();
 <a href=#138 id=138 data-nosnippet>138</a>        }
-<a href=#139 id=139 data-nosnippet>139</a>        InterruptVector(_interrupt_handler, Psr::None)
+<a href=#139 id=139 data-nosnippet>139</a>        InterruptVector(_interrupt_handler, Psr::NONE)
 <a href=#140 id=140 data-nosnippet>140</a>    };
 <a href=#141 id=141 data-nosnippet>141</a>}
 <a href=#142 id=142 data-nosnippet>142</a>
@@ -151,9 +151,9 @@
 <a href=#151 id=151 data-nosnippet>151</a>///
 <a href=#152 id=152 data-nosnippet>152</a>/// ``` no_run
 <a href=#153 id=153 data-nosnippet>153</a>/// interrupt_vectors![
-<a href=#154 id=154 data-nosnippet>154</a>///     InterruptVector(MyHandler1, Psr::None), // int EXCEPTION_COUNT+0
-<a href=#155 id=155 data-nosnippet>155</a>///     InterruptVector(MyHandler2, Psr::None), // int EXCEPTION_COUNT+1
-<a href=#156 id=156 data-nosnippet>156</a>///     InterruptVector(MyHandler3, Psr::None), // int EXCEPTION_COUNT+2
+<a href=#154 id=154 data-nosnippet>154</a>///     InterruptVector(MyHandler1, Psr::NONE), // int EXCEPTION_COUNT+0
+<a href=#155 id=155 data-nosnippet>155</a>///     InterruptVector(MyHandler2, Psr::NONE), // int EXCEPTION_COUNT+1
+<a href=#156 id=156 data-nosnippet>156</a>///     InterruptVector(MyHandler3, Psr::NONE), // int EXCEPTION_COUNT+2
 <a href=#157 id=157 data-nosnippet>157</a>/// ];
 <a href=#158 id=158 data-nosnippet>158</a>///
 <a href=#159 id=159 data-nosnippet>159</a>/// #[cdm_rt::interrupt]
@@ -299,7 +299,7 @@
 <a href=#299 id=299 data-nosnippet>299</a>#[<span class="kw">unsafe</span>(no_mangle)]
 <a href=#300 id=300 data-nosnippet>300</a>#[<span class="kw">unsafe</span>(link_section = <span class="string">".ivt.exceptions"</span>)]
 <a href=#301 id=301 data-nosnippet>301</a></span><span class="kw">static </span>__EXCEPTIONS: [ExceptionVector; EXCEPTION_COUNT] = [
-<a href=#302 id=302 data-nosnippet>302</a>    ExceptionVector(reset, Psr::None),
+<a href=#302 id=302 data-nosnippet>302</a>    ExceptionVector(reset, Psr::from_bits(<span class="number">0x0</span>)),
 <a href=#303 id=303 data-nosnippet>303</a>    ExceptionVector(unaligned_sp, Psr::from_bits(<span class="number">0x1</span>)),
 <a href=#304 id=304 data-nosnippet>304</a>    ExceptionVector(unaligned_pc, Psr::from_bits(<span class="number">0x2</span>)),
 <a href=#305 id=305 data-nosnippet>305</a>    ExceptionVector(invalid_inst, Psr::from_bits(<span class="number">0x3</span>)),

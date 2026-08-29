@@ -3,7 +3,7 @@
 <p>Use the <code>cdm_rt::interrupt_vectors</code> macro to register the function in the interrupt vector table.</p>
 
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="macro">cdm_rt::interrupt_vectors!</span>[
-    cdm_rt::InterruptVector(on_input, cdm_rt::Psr::None)
+    cdm_rt::InterruptVector(on_input, cdm_rt::Psr::NONE)
 ];
 
 <span class="attr">#[cdm_rt::interrupt]

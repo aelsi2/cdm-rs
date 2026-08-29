@@ -7,9 +7,9 @@ starting from index <code>EXCEPTION_COUNT</code>. The rest of the table is fille
 <p>Use the <a href="attr.interrupt.html" title="attr cdm_rt::interrupt"><code>interrupt</code></a> attribute to define interrupt handler functions.</p>
 
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="macro">interrupt_vectors!</span>[
-    InterruptVector(MyHandler1, Psr::None), <span class="comment">// int EXCEPTION_COUNT+0
-    </span>InterruptVector(MyHandler2, Psr::None), <span class="comment">// int EXCEPTION_COUNT+1
-    </span>InterruptVector(MyHandler3, Psr::None), <span class="comment">// int EXCEPTION_COUNT+2
+    InterruptVector(MyHandler1, Psr::NONE), <span class="comment">// int EXCEPTION_COUNT+0
+    </span>InterruptVector(MyHandler2, Psr::NONE), <span class="comment">// int EXCEPTION_COUNT+1
+    </span>InterruptVector(MyHandler3, Psr::NONE), <span class="comment">// int EXCEPTION_COUNT+2
 </span>];
 
 <span class="attr">#[cdm_rt::interrupt]
