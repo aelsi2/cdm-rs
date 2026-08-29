@@ -3,7 +3,7 @@
 //! # Features
 //!
 //! This crate provides:
-//! - Access to special registers: `PSR`, `SP`, `FP`, `PC`
+//! - Access to special registers: `PSR`, `SP`, `FP`, `PC`, `SSP`
 //! - Interrupt control functions
 //! - Wrappers around assembly instructions like `wait` and `halt`
 //! - An optional `critical-section` implementation

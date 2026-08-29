@@ -83,3 +83,23 @@ pub mod fp {
         value
     }
 }
+
+#[cfg(target_feature = "e")]
+pub mod ssp {
+    //! Shadow stack pointer (SSP).
+    use core::arch::asm;
+
+    /// Reads the register value.
+    #[inline(always)]
+    pub fn read() -> usize {
+        let value: usize;
+        unsafe { asm!("ldssp {}", out(reg) value, options(nomem, nostack, preserves_flags)) }
+        value
+    }
+
+    /// Writes `value` to the register.
+    #[inline(always)]
+    pub unsafe fn write(value: usize) {
+        unsafe { asm!("stssp {}", in(reg) value, options(nomem, nostack, preserves_flags)) }
+    }
+}
