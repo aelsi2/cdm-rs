@@ -7,7 +7,10 @@ specific handler</li>
 <li><code>UnalignedPC</code> - unaligned program counter</li>
 <li><code>InvalidInst</code> - invalid instruction</li>
 <li><code>DoubleFault</code> - double fault</li>
+<li><code>PrivViolation</code> - privilege violation (CdM-16e only)</li>
+<li><code>SystemCall</code> - system call (CdM-16e only)</li>
 </ul>
+<p>Alternatively, a integer literal IVT index in the range [1; 15] can be used.</p>
 <p>The function must have the following signature: <code>[unsafe] fn() -&gt; !</code>.
 It will be called when the specified exception occurs.</p>
 <p>Each exception handler must be defined at most <strong>once</strong> in the dependency graph.</p>
@@ -21,6 +24,13 @@ It will be called when the specified exception occurs.</p>
 
 <span class="attr">#[cdm_rt::exception(InvalidInst)]
 </span><span class="kw">fn </span>on_invalid_inst() -&gt; ! {
+    <span class="kw">loop </span>{
+        <span class="comment">/* .. */
+    </span>}
+}
+
+<span class="attr">#[cdm_rt::exception(<span class="number">7</span>)]
+</span><span class="kw">fn </span>on_system_call() -&gt; ! {
     <span class="kw">loop </span>{
         <span class="comment">/* .. */
     </span>}

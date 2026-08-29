@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":["fp","pc","psr","sp"]};
+window.SIDEBAR_ITEMS = {"mod":["fp","pc","psr","sp","ssp"]};
