@@ -4,7 +4,7 @@ pub mod psr {
     //! Processor status register (PSR).
     use core::arch::asm;
 
-    /// Processor status register flags.
+    /// Processor status register bit field.
     #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
     #[repr(transparent)]
     pub struct Psr(
@@ -72,25 +72,33 @@ pub mod psr {
             self.bits() & flags.bits() != 0
         }
 
-        /// Inverts the flags of the processor status value.
+        /// Inverts the bits of the processor status value.
+        ///
+        /// *Note: affects the MMU context bits on `cdm16e`.*
         #[inline(always)]
         pub const fn not(self) -> Self {
             Self(!self.bits())
         }
 
-        /// ANDs the flags of two processor status values.
+        /// ANDs the bits of two processor status values.
+        ///
+        /// *Note: affects the MMU context bits on `cdm16e`.*
         #[inline(always)]
         pub const fn and(self, other: Self) -> Self {
             Self(self.bits() & other.bits())
         }
 
-        /// ORs the flags of two processor status values.
+        /// ORs the bits of two processor status values.
+        ///
+        /// *Note: affects the MMU context bits on `cdm16e`.*
         #[inline(always)]
         pub const fn or(self, other: Self) -> Self {
             Self(self.bits() | other.bits())
         }
 
-        /// XORs the flags of two processor status values.
+        /// XORs the bits of two processor status values.
+        ///
+        /// *Note: affects the MMU context bits on `cdm16e`.*
         #[inline(always)]
         pub const fn xor(self, other: Self) -> Self {
             Self(self.bits() ^ other.bits())
@@ -201,7 +209,10 @@ pub mod psr {
         }
     }
 
-    /// Reads the register value.
+    /// Reads the value of the processor status register (PSR).
+    ///
+    /// *Note: arithmetic flags are volatile an may change as a side effect of almost any instruction.
+    /// If you want to work with these flags, please use inline assembly blocks.*
     #[inline(always)]
     pub fn read() -> Psr {
         let value: u16;
@@ -209,7 +220,15 @@ pub mod psr {
         Psr::from(value)
     }
 
-    /// Writes `value` to the register.
+    /// Writes the value to the processor status register (PSR).
+    ///
+    /// # Safety
+    /// Setting the interrupt enable bit in the PSR will immediately enable interrupts, ending the
+    /// current critical section (if there is one), which may lead to a race condition if an interrupt is triggered.
+    ///
+    /// The values of the reserved bits must be preserved. Failing to do so may lead to undefined behavior
+    /// on an extended CPU where these bits are actually used. Therefore, each write to the register should be preceded
+    /// with a read to get the values of the reserved bits.
     #[inline(always)]
     pub unsafe fn write(value: Psr) {
         let val: u16 = value.into();
@@ -219,7 +238,11 @@ pub mod psr {
 
 pub mod pc {
     //! Program counter (PC).
+    //!
+    //! *Note: this module is purely for debugging purposes. If you want to work with this register
+    //! directly, please use inline assembly blocks.*
 
+    // Please use the `cdm::register::pc::read!()` alias instead of using this macro directly.
     #[doc(hidden)]
     #[macro_export]
     macro_rules! internal_pc_read {
@@ -232,14 +255,30 @@ pub mod pc {
         };
     }
 
-    /// Reads the register value.
+    /// Reads the value of the program counter (PC) register.
+    ///
+    /// # Requirements
+    /// The macro expands to an inline assembly block. It requires enabling the `asm_experimental_arch`
+    /// compiler feature in your crate. This can be done by adding the following line to the top of
+    /// your crate's `main.rs` or `lib.rs`:
+    /// ```rust
+    /// #![feature(asm_experimental_arch)]
+    /// ```
+    ///
+    /// *Note: this is a macro and not a function, because if it was, it would always return the address of
+    /// the function. The function could (and most likely would) be inlined, but this would be unreliable,
+    /// because even `#[inline(always)]` does not guarantee this.*
     #[doc(inline)]
     pub use crate::internal_pc_read as read;
 }
 
 pub mod sp {
     //! Stack pointer (SP).
+    //!
+    //! *Note: this module is purely for debugging purposes. If you want to work with this register
+    //! directly, please use inline assembly blocks.*
 
+    // Please use the `cdm::register::sp::read!()` alias instead of using this macro directly.
     #[doc(hidden)]
     #[macro_export]
     macro_rules! internal_sp_read {
@@ -252,14 +291,31 @@ pub mod sp {
         };
     }
 
-    /// Reads the register value.
+    /// Reads the value of the stack pointer (SP) register.
+    ///
+    /// # Requirements
+    /// The macro expands to an inline assembly block. It requires enabling the `asm_experimental_arch`
+    /// compiler feature in your crate. This can be done by adding the following line to the top of
+    /// your crate's `main.rs` or `lib.rs`:
+    /// ```rust
+    /// #![feature(asm_experimental_arch)]
+    /// ```
+    ///
+    /// *Note: this is a macro and not a function, because SP is often modified in the function prologue,
+    /// so a function may return an inaccurate result, pointing to the end of the next stack frame
+    /// instead of the frame of the function where it was used. The function could (and most likely would) be inlined,
+    /// but this would be unreliable, because even `#[inline(always)]` does not guarantee this.*
     #[doc(inline)]
     pub use crate::internal_sp_read as read;
 }
 
 pub mod fp {
     //! Frame pointer (FP).
+    //!
+    //! *Note: this module is purely for debugging purposes. If you want to work with this register
+    //! directly, please use inline assembly blocks.*
 
+    // Please use the `cdm::register::fp::read!()` alias instead of using this macro directly.
     #[doc(hidden)]
     #[macro_export]
     macro_rules! internal_fp_read {
@@ -272,7 +328,23 @@ pub mod fp {
         };
     }
 
-    /// Reads the register value.
+    /// Reads the value of the frame pointer (FP) register.
+    ///
+    /// *Note: the compiler can sometimes omit FP in a function, so FP may contain the address of
+    /// the frame from the immediate caller, or some other caller down the stack.*
+    ///
+    /// # Requirements
+    /// The macro expands to an inline assembly block. It requires enabling the `asm_experimental_arch`
+    /// compiler feature in your crate. This can be done by adding the following line to the top of
+    /// your crate's `main.rs` or `lib.rs`:
+    /// ```rust
+    /// #![feature(asm_experimental_arch)]
+    /// ```
+    ///
+    /// *Note: this is a macro and not a function, because FP is often modified in the function prologue,
+    /// so a function may return an inaccurate result, pointing to the next stack frame instead of
+    /// the frame of the function where it was used. The function could (and most likely would) be inlined,
+    /// but this would be unreliable, because `#[inline(always)]` does not guarantee this.*
     #[doc(inline)]
     pub use crate::internal_fp_read as read;
 }
@@ -281,9 +353,11 @@ pub mod fp {
 #[cfg(any(target_feature = "e", doc))]
 pub mod ssp {
     //! Shadow stack pointer (SSP).
+    //!
+    //! This register stores the user mode value of SP while executing in system (kernel) mode.
     use core::arch::asm;
 
-    /// Reads the register value.
+    /// Reads the value of the shadow stack pointer (SSP) register.
     #[inline(always)]
     pub fn read() -> usize {
         let value: usize;
@@ -291,7 +365,13 @@ pub mod ssp {
         value
     }
 
-    /// Writes `value` to the register.
+    /// Writes `value` to the shadow stack pointer (SSP) register.
+    ///
+    /// # Safety
+    /// The value stored in the SSP register must be a valid reference to the last word on the user
+    /// stack (a multiple of 2 bytes) when returning to user code. Failing to meet this condition
+    /// will lead to undefined behavior (likely memory corruption and crash).
+    /// Having an invalid intermediate value while executing in system mode is allowed.
     #[inline(always)]
     pub unsafe fn write(value: usize) {
         unsafe { asm!("stssp {}", in(reg) value, options(nomem, nostack, preserves_flags)) }
