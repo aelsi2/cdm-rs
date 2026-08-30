@@ -31,7 +31,7 @@ pub mod psr {
         /// Bit mask for the MMU context number (8 consecutive bits).
         #[doc(cfg(target_feature = "e"))]
         #[cfg(any(target_feature = "e", doc))]
-        pub const MMU_CONTEXT: Self = Self::from_bits(0xFF0);
+        pub const CONTEXT_BITS: Self = Self::from_bits(0xFF0);
 
         /// I/O mapping enable flag.
         #[doc(cfg(target_feature = "e"))]
@@ -96,6 +96,14 @@ pub mod psr {
             Self(self.bits() ^ other.bits())
         }
 
+        /// Replaces the MMU context number in a processor status value.
+        #[doc(cfg(target_feature = "e"))]
+        #[cfg(any(target_feature = "e", doc))]
+        #[inline(always)]
+        pub const fn with_context_number(self, context_number: u8) -> Self {
+            Self::from_context_number(context_number).or(self.and(Self::CONTEXT_BITS.not()))
+        }
+
         /// Creates a processor status value from a MMU context number.
         #[doc(cfg(target_feature = "e"))]
         #[cfg(any(target_feature = "e", doc))]
@@ -109,7 +117,7 @@ pub mod psr {
         #[cfg(any(target_feature = "e", doc))]
         #[inline(always)]
         pub const fn context_number(self) -> u8 {
-            (self.and(Self::MMU_CONTEXT).bits() >> 4) as u8
+            (self.and(Self::CONTEXT_BITS).bits() >> 4) as u8
         }
     }
 
