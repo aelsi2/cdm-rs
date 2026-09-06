@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"attr":["entry","exception","interrupt"],"constant":["EXCEPTION_COUNT","INTERRUPT_COUNT"],"macro":["interrupt_vectors"],"struct":["InterruptVector","Psr"]};
+window.SIDEBAR_ITEMS = {"attr":["entry","exception","interrupt"],"constant":["EXCEPTION_COUNT","INTERRUPT_COUNT"],"macro":["interrupt_vectors"],"struct":["InterruptContext","InterruptVector","Psr"]};

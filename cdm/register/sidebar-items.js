@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":["fp","pc","psr","sp","ssp"]};
+window.SIDEBAR_ITEMS = {"mod":["fp","pc","psr","sp","ssp"],"struct":["CpuContext"],"type":["Gpr"]};
