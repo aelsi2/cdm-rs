@@ -1,5 +1,37 @@
 //! Processor register types and functions.
 
+/// Unsigned integer type that represents the value of a general purpose register.
+pub type Gpr = u16;
+
+/// Processor context, excluding the stack pointer.
+/// Matches the layout of the context pushed onto the stack when an ISR is entered.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[repr(C)]
+pub struct CpuContext {
+    /// `r0` general purpose register.
+    pub r0: Gpr,
+    /// `r1` general purpose register.
+    pub r1: Gpr,
+    /// `r2` general purpose register.
+    pub r2: Gpr,
+    /// `r3` general purpose register.
+    pub r3: Gpr,
+    /// `r4` general purpose register.
+    pub r4: Gpr,
+    /// `r5` general purpose register.
+    pub r5: Gpr,
+    /// `r6` general purpose register.
+    pub r6: Gpr,
+    /// Frame pointer register (FP).
+    ///
+    /// *Note: this is an alias for the `r7` general purpose register.*
+    pub fp: usize,
+    /// Program counter (PC) register.
+    pub pc: usize,
+    /// Processor status (PS) register.
+    pub ps: psr::Psr,
+}
+
 pub mod psr {
     //! Processor status register (PSR).
     use core::arch::asm;

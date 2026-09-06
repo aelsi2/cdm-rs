@@ -112,11 +112,45 @@ pub use cdm_macros::interrupt;
 
 pub use cdm::register::psr::Psr;
 
+use core::ops::Deref;
+use core::fmt::Debug;
+use cdm::register::CpuContext;
+
 /// The number of exception vectors in the interrupt vector table, including the start vector.
 pub const EXCEPTION_COUNT: usize = 16;
 
 /// The number of application-specific interrupt vectors in the interrupt vector table.
 pub const INTERRUPT_COUNT: usize = 64 - EXCEPTION_COUNT;
+
+/// Represents the processor context saved on the stack when an ISR is entered.
+#[repr(transparent)]
+pub struct InterruptContext(CpuContext);
+
+impl Deref for InterruptContext {
+    type Target = CpuContext;
+
+    fn deref(&self) -> &Self::Target {
+        let InterruptContext(context) = self;
+        context
+    }
+}
+
+impl Debug for InterruptContext {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        Debug::fmt(&self.0, f)
+    }
+}
+
+impl InterruptContext {
+    /// Gives mutable access to the contents of the interrupt context.
+    ///
+    /// # Safety
+    /// This function is unsafe since modifying the content of the context can easily lead to undefined behavior.
+    /// For example, by writing an invalid value to the program counter field, the CPU can jump to arbitrary code at the end of the interrupt.
+    pub unsafe fn as_mut(&mut self) -> &mut CpuContext {
+        &mut self.0
+    }
+}
 
 /// Represents a vector in the interrupt vector table.
 ///
@@ -126,7 +160,7 @@ pub const INTERRUPT_COUNT: usize = 64 - EXCEPTION_COUNT;
 /// Use `#[interrupt]` to define interrupt handler functions.
 #[derive(Clone, Copy)]
 #[repr(C)]
-pub struct InterruptVector(pub unsafe extern "cdm-isr" fn(), pub Psr);
+pub struct InterruptVector(pub unsafe extern "cdm-isr" fn(ctx: &mut InterruptContext), pub Psr);
 
 impl InterruptVector {
     /// The default vector used in absence of an explicit definition.
@@ -134,7 +168,7 @@ impl InterruptVector {
     /// Calls `_interrupt_handler`, which triggers a hardware halt by default.
     pub const DEFAULT: Self = {
         unsafe extern "cdm-isr" {
-            fn _interrupt_handler();
+            fn _interrupt_handler(ctx: &mut InterruptContext);
         }
         InterruptVector(_interrupt_handler, Psr::NONE)
     };
@@ -191,7 +225,7 @@ macro_rules! interrupt_vectors {
 
 #[derive(Clone, Copy)]
 #[repr(C)]
-struct ExceptionVector(pub unsafe extern "C" fn() -> !, pub Psr);
+struct ExceptionVector(pub unsafe extern "cdm-isr" fn(ctx: &mut InterruptContext), pub Psr);
 
 // Initialization code
 #[cfg(not(feature = "harvard"))]
@@ -259,39 +293,39 @@ core::arch::global_asm!(
     "halt",
 );
 
-unsafe extern "C" {
+unsafe extern "cdm-isr" {
     #[link_name = "_start"]
-    fn reset() -> !;
+    fn reset(ctx: &mut InterruptContext);
     #[link_name = "_ex_unaligned_sp"]
-    fn unaligned_sp() -> !;
+    fn unaligned_sp(ctx: &mut InterruptContext);
     #[link_name = "_ex_unaligned_pc"]
-    fn unaligned_pc() -> !;
+    fn unaligned_pc(ctx: &mut InterruptContext);
     #[link_name = "_ex_invalid_inst"]
-    fn invalid_inst() -> !;
+    fn invalid_inst(ctx: &mut InterruptContext);
     #[link_name = "_ex_double_fault"]
-    fn double_fault() -> !;
+    fn double_fault(ctx: &mut InterruptContext);
     #[link_name = "_ex_priv_violation"]
-    fn priv_violation() -> !;
+    fn priv_violation(ctx: &mut InterruptContext);
     #[link_name = "_ex_reserved_6"]
-    fn ex_reserved_6() -> !;
+    fn ex_reserved_6(ctx: &mut InterruptContext);
     #[link_name = "_ex_system_call"]
-    fn system_call() -> !;
+    fn system_call(ctx: &mut InterruptContext);
     #[link_name = "_ex_reserved_8"]
-    fn ex_reserved_8() -> !;
+    fn ex_reserved_8(ctx: &mut InterruptContext);
     #[link_name = "_ex_reserved_9"]
-    fn ex_reserved_9() -> !;
+    fn ex_reserved_9(ctx: &mut InterruptContext);
     #[link_name = "_ex_reserved_a"]
-    fn ex_reserved_a() -> !;
+    fn ex_reserved_a(ctx: &mut InterruptContext);
     #[link_name = "_ex_reserved_b"]
-    fn ex_reserved_b() -> !;
+    fn ex_reserved_b(ctx: &mut InterruptContext);
     #[link_name = "_ex_reserved_c"]
-    fn ex_reserved_c() -> !;
+    fn ex_reserved_c(ctx: &mut InterruptContext);
     #[link_name = "_ex_reserved_d"]
-    fn ex_reserved_d() -> !;
+    fn ex_reserved_d(ctx: &mut InterruptContext);
     #[link_name = "_ex_reserved_e"]
-    fn ex_reserved_e() -> !;
+    fn ex_reserved_e(ctx: &mut InterruptContext);
     #[link_name = "_ex_reserved_f"]
-    fn ex_reserved_f() -> !;
+    fn ex_reserved_f(ctx: &mut InterruptContext);
 }
 
 // Harware-defined exception vectors

@@ -1,6 +1,5 @@
 [build]
 target = "cdm-none"
-rustflags = ["-C", "target_feature=+e,+m"]
 
 [unstable]
 build-std = [ "core" ]
