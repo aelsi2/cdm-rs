@@ -132,7 +132,7 @@ impl ItemFnExt for ItemFn {
                 Some(arg) => match arg {
                     FnArg::Receiver(_) => false,
                     FnArg::Typed(pat_type) => match &*pat_type.ty {
-                        Type::Infer(_) => true,
+                        Type::Path(_) => true,
                         _ => false,
                     },
                 },
@@ -227,8 +227,7 @@ pub fn entry(args: TokenStream, input: TokenStream) -> TokenStream {
 ///
 /// Alternatively, a integer literal IVT index in the range [1; 15] can be used.
 ///
-/// The function must return `()` or `!` and accept either no parameters or a single parameter of type `_`.
-/// The macro replaces the type of the parameter with `&mut ::cdm_rt::InterruptContext`.
+/// The function must return `()` or `!` and accept either no parameters or a single parameter of type `cdm_rt::InterruptContext<'_>`.
 /// The parameter can be used to inspect and modify the processor context saved on the stack.
 ///
 /// Each exception handler must be defined at most once in the entire application, including all crates.
@@ -242,14 +241,14 @@ pub fn entry(args: TokenStream, input: TokenStream) -> TokenStream {
 /// }
 ///
 /// #[cdm_rt::exception(InvalidInst)]
-/// fn on_invalid_inst(ctx: _) -> ! {
+/// fn on_invalid_inst(ctx: cdm_rt::InterruptContext<'_>) -> ! {
 ///     loop {
 ///         /* .. */
 ///     }
 /// }
 ///
 /// #[cdm_rt::exception(7)]
-/// fn on_system_call(ctx: _) {
+/// fn on_system_call(mut ctx: cdm_rt::InterruptContext<'_>) {
 ///     unsafe { ctx.as_mut().pc += 2 };
 ///     /* handle system call */
 /// }
@@ -261,7 +260,7 @@ pub fn exception(args: TokenStream, input: TokenStream) -> TokenStream {
     if !f.validate_isr_sig() {
         return parse::Error::new(
             f.sig.span(),
-            "`#[interrupt]` functions must return either `()` or `!` and accept either no parameters or a single parameter of type `_`",
+            "`#[interrupt]` functions must return either `()` or `!` and accept either no parameters or a single parameter of type `cdm_rt::InterruptContext<'_>`",
         )
         .to_compile_error()
         .into();
@@ -278,24 +277,33 @@ pub fn exception(args: TokenStream, input: TokenStream) -> TokenStream {
     let ret = f.sig.output;
     let first_arg = f.sig.inputs.iter().next();
 
-    if let Some(arg) = first_arg {
-        let FnArg::Typed(pat_type) = arg else { panic!("unreachable") };
-        let mut typed_arg = pat_type.clone();
-        typed_arg.ty = Box::new(syn::parse_str::<syn::Type>("&mut ::cdm_rt::InterruptContext").unwrap());
+    let ctx_ident = syn::Ident::new("__exception_context", proc_macro2::Span::mixed_site());
+    let impl_ident = syn::Ident::new("__exception_impl", proc_macro2::Span::mixed_site());
 
+    if let Some(arg) = first_arg {
         quote!(
             #[unsafe(export_name = #export_name)]
             #(#attrs)*
-            #vis #unsafety extern "cdm-isr" fn #name(#typed_arg) #ret {
-                #(#stmts)*
+            #vis #unsafety extern "cdm-isr" fn #name(#ctx_ident: ::cdm_rt::InterruptContext<'_>) {
+                #[inline(always)]
+                #unsafety fn #impl_ident(#arg) #ret {
+                    #(#stmts)*
+                }
+                #[allow(unused_unsafe)]
+                #unsafety { #impl_ident(#ctx_ident); }
             }
         )
     } else {
         quote!(
             #[unsafe(export_name = #export_name)]
             #(#attrs)*
-            #vis #unsafety extern "cdm-isr" fn #name(_: &mut ::cdm_rt::InterruptContext) #ret {
-                #(#stmts)*
+            #vis #unsafety extern "cdm-isr" fn #name(_: ::cdm_rt::InterruptContext<'_>) {
+                #[inline(always)]
+                #unsafety fn #impl_ident() #ret {
+                    #(#stmts)*
+                }
+                #[allow(unused_unsafe)]
+                #unsafety { #impl_ident(); }
             }
         )
     }.into()
@@ -303,8 +311,7 @@ pub fn exception(args: TokenStream, input: TokenStream) -> TokenStream {
 
 /// Defines an application-specific interrupt handler.
 ///
-/// The function must return `()` or `!` and accept either no parameters or a single parameter of type `_`.
-/// The macro replaces the type of the parameter with `&mut ::cdm_rt::InterruptContext`.
+/// The function must return `()` or `!` and accept either no parameters or a single parameter of type `cdm_rt::InterruptContext<'_>`.
 /// The parameter can be used to inspect and modify the processor context saved on the stack.
 ///
 /// Use the `cdm_rt::interrupt_vectors` macro to register the function in the interrupt vector table.
@@ -321,7 +328,7 @@ pub fn exception(args: TokenStream, input: TokenStream) -> TokenStream {
 /// }
 ///
 /// #[cdm_rt::interrupt]
-/// fn on_timer(ctx: _) {
+/// fn on_timer(ctx: cdm_rt::InterruptContext<'_>) {
 ///     /* .. */
 /// }
 /// ```
@@ -341,7 +348,7 @@ pub fn interrupt(args: TokenStream, input: TokenStream) -> TokenStream {
     if !f.validate_isr_sig() {
         return parse::Error::new(
             f.sig.span(),
-            "`#[interrupt]` functions must return either `()` or `!` and accept either no parameters or a single parameter of type `_`",
+            "`#[interrupt]` functions must return either `()` or `!` and accept either no parameters or a single parameter of type `cdm_rt::InterruptContext<'_>`",
         )
         .to_compile_error()
         .into();
@@ -355,22 +362,31 @@ pub fn interrupt(args: TokenStream, input: TokenStream) -> TokenStream {
     let ret = f.sig.output;
     let first_arg = f.sig.inputs.iter().next();
 
-    if let Some(arg) = first_arg {
-        let FnArg::Typed(pat_type) = arg else { panic!("receiver argument should have been rejected by validate_isr_sig") };
-        let mut pat_type = pat_type.clone();
-        pat_type.ty = Box::new(syn::parse_str::<syn::Type>("&mut ::cdm_rt::InterruptContext").unwrap());
+    let ctx_ident = syn::Ident::new("__interrupt_context", proc_macro2::Span::mixed_site());
+    let impl_ident = syn::Ident::new("__interrupt_impl", proc_macro2::Span::mixed_site());
 
+    if let Some(arg) = first_arg {
         quote!(
             #(#attrs)*
-            #vis #unsafety extern "cdm-isr" fn #name(#pat_type) #ret {
-                #(#stmts)*
+            #vis #unsafety extern "cdm-isr" fn #name(#ctx_ident: ::cdm_rt::InterruptContext<'_>) {
+                #[inline(always)]
+                #unsafety fn #impl_ident(#arg) #ret {
+                    #(#stmts)*
+                }
+                #[allow(unused_unsafe)]
+                #unsafety { #impl_ident(#ctx_ident); }
             }
         )
     } else {
         quote!(
             #(#attrs)*
-            #vis #unsafety extern "cdm-isr" fn #name(_: &mut ::cdm_rt::InterruptContext) #ret {
-                #(#stmts)*
+            #vis #unsafety extern "cdm-isr" fn #name(_: ::cdm_rt::InterruptContext<'_>) {
+                #[inline(always)]
+                #unsafety fn #impl_ident() #ret {
+                    #(#stmts)*
+                }
+                #[allow(unused_unsafe)]
+                #unsafety { #impl_ident(); }
             }
         )
     }
